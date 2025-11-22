@@ -1,5 +1,10 @@
 package net.ethyl.lattice_api;
 
+import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.main.DataGeneration;
+import net.ethyl.lattice_api.core.utils.ErrUtils;
+import net.ethyl.lattice_api.modules.TestingRegistries;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -16,5 +21,16 @@ public class LatticeApi {
 
     public LatticeApi(IEventBus modEventBus, ModContainer modContainer) {
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        TestingRegistries.register(modEventBus);
+
+        DataGeneration.addListeners(modEventBus);
+    }
+
+    public static void invalidIdErr(@NotNull RegistryId registryId) {
+        ErrUtils.invalidIdErr(registryId);
+    }
+
+    public static void duplicateObjectErr(@NotNull RegistryId registryId) {
+        ErrUtils.duplicateObjectErr(registryId);
     }
 }
