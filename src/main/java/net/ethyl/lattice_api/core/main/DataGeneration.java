@@ -1,7 +1,9 @@
 package net.ethyl.lattice_api.core.main;
 
 import net.ethyl.lattice_api.LatticeApi;
+import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.ethyl.lattice_api.modules.base.LatticeTag;
+import net.ethyl.lattice_api.modules.common.modelTypes.item.LatticeItemModelType;
 import net.ethyl.lattice_api.modules.common.tags.LatticeBlockTag;
 import net.ethyl.lattice_api.modules.common.tags.LatticeItemTag;
 import net.minecraft.core.HolderLookup;
@@ -11,6 +13,7 @@ import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
@@ -29,6 +32,8 @@ public class DataGeneration {
         BlockTagsProvider blockTagsProvider = new BlockTagGenerator(packOutput, lookupProvider, existingFileHelper);
         dataGenerator.addProvider(event.includeServer(), blockTagsProvider);
         dataGenerator.addProvider(event.includeServer(), new ItemTagGenerator(packOutput, lookupProvider, blockTagsProvider.contentsGetter(), existingFileHelper));
+
+        dataGenerator.addProvider(event.includeClient(), new ItemModelGenerator(packOutput, existingFileHelper));
     }
 
     public static class BlockTagGenerator extends BlockTagsProvider {
@@ -61,6 +66,23 @@ public class DataGeneration {
 
                     lItemTag.getTagContent().forEach(itemSupplier -> tagAppender.add(itemSupplier.get()));
                 }
+            }
+        }
+    }
+
+    public static class ItemModelGenerator extends ItemModelProvider {
+        public ItemModelGenerator(PackOutput output, ExistingFileHelper existingFileHelper) {
+            super(output, LatticeApi.MOD_ID, existingFileHelper);
+        }
+
+        @Override
+        protected void registerModels() {
+            for (LatticeItem<?> latticeItem : LatticeRegistries.getItems()) {
+                Item item = latticeItem.get();
+                LatticeItemModelType modelType = latticeItem.getModelType();
+
+                if (modelType == LatticeRegistries.ModelTypes.Item.BASIC) basicItem(item);
+                else if (modelType == LatticeRegistries.ModelTypes.Item.HANDHELD) handheldItem(item);
             }
         }
     }

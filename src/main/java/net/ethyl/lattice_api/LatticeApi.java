@@ -2,6 +2,7 @@ package net.ethyl.lattice_api;
 
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.core.main.DataGeneration;
+import net.ethyl.lattice_api.core.main.LatticeRegistries;
 import net.ethyl.lattice_api.core.utils.ErrUtils;
 import net.ethyl.lattice_api.modules.TestingRegistries;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +24,7 @@ public class LatticeApi {
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         TestingRegistries.register(modEventBus);
 
+        LatticeRegistries.register(modEventBus);
         DataGeneration.addListeners(modEventBus);
     }
 
