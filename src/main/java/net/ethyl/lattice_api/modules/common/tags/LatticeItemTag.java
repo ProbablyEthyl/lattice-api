@@ -1,0 +1,50 @@
+package net.ethyl.lattice_api.modules.common.tags;
+
+import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.modules.base.LatticeItem;
+import net.ethyl.lattice_api.modules.base.LatticeTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import org.apache.commons.lang3.function.TriFunction;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+public class LatticeItemTag extends LatticeTag<Item> {
+    private LatticeItemTag(@NotNull RegistryId registryId, @NotNull TagKey<Item> tagKey, @NotNull Builder builder) {
+        super(registryId, tagKey, builder);
+    }
+
+    public static Builder builder() {
+        return new Builder(LatticeItemTag::new, ItemTags::create);
+    }
+
+    public static class Builder extends AppendableBuilder<LatticeItemTag, Builder> {
+        protected Builder(@NotNull TriFunction<RegistryId, TagKey<Item>, Builder, LatticeItemTag> latticeFactory, @NotNull Function<ResourceLocation, TagKey<Item>> tagKeyFactory) {
+            super(latticeFactory, tagKeyFactory);
+        }
+    }
+
+    public static class AppendableBuilder<I extends LatticeTag<Item>, B extends AppendableBuilder<I, B>> extends LatticeTag.Builder<Item, I, B> {
+        protected AppendableBuilder(@NotNull TriFunction<RegistryId, TagKey<Item>, B, I> latticeFactory, @NotNull Function<ResourceLocation, TagKey<Item>> tagKeyFactory) {
+            super(latticeFactory, tagKeyFactory);
+        }
+
+        public B add(@NotNull LatticeItem<?> latticeItem) {
+            return this.add(latticeItem::get);
+        }
+
+        public B add(@NotNull Item item) {
+            return this.add(() -> item);
+        }
+
+        private B add(@NotNull Supplier<Item> itemSupplier) {
+            this.tagContent.add(itemSupplier);
+
+            return this.self();
+        }
+    }
+}
