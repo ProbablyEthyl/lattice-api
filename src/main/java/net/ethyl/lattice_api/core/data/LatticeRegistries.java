@@ -1,13 +1,13 @@
-package net.ethyl.lattice_api.core.main;
+package net.ethyl.lattice_api.core.data;
 
 import net.ethyl.lattice_api.LatticeApi;
 import net.ethyl.lattice_api.core.instances.RegistryId;
-import net.ethyl.lattice_api.core.utils.BlockUtils;
 import net.ethyl.lattice_api.core.utils.RegistryUtils;
 import net.ethyl.lattice_api.modules.base.*;
-import net.ethyl.lattice_api.modules.common.modelTypes.LatticeBlockModelType;
-import net.ethyl.lattice_api.modules.common.modelTypes.LatticeItemModelType;
 import net.ethyl.lattice_api.modules.common.tabs.LatticeCreativeTab;
+import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeBlockModelType;
+import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeItemModelType;
+import net.ethyl.lattice_api.modules.common.types.other.LatticeLootTable;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -22,7 +22,7 @@ import java.util.LinkedList;
 
 public class LatticeRegistries {
     private static final Collection<LatticeTag<?>> tags = new LinkedList<>();
-    private static final Collection<LatticeModelType> modelTypes = new LinkedList<>();
+    private static final Collection<LatticeType> modelTypes = new LinkedList<>();
     private static final Collection<LatticeItem<?>> items = new LinkedList<>();
     private static final Collection<LatticeBlock<?>> blocks = new LinkedList<>();
     private static final Collection<LatticeCreativeTab> tabs = new LinkedList<>();
@@ -31,8 +31,8 @@ public class LatticeRegistries {
         return new Tags(modId);
     }
 
-    public static ModelTypes createModelTypes(@NotNull String modId) {
-        return new ModelTypes(modId);
+    public static Types createTypes(@NotNull String modId) {
+        return new Types(modId);
     }
 
     public static Items createItems(@NotNull String modId) {
@@ -52,7 +52,7 @@ public class LatticeRegistries {
             super(modId);
         }
 
-        public <T, I extends LatticeTag<T>> I register(@NotNull String id, @NotNull LatticeTag.Builder<T, I, ?> builder) {
+        public <T, I extends LatticeTag<T>> I register(@NotNull String id, @NotNull LatticeTag.AppendableBuilder<T, I, ?> builder) {
             I latticeTag = builder.build(createRegistryId(this, id));
             this.registryContent.add(latticeTag);
 
@@ -67,33 +67,46 @@ public class LatticeRegistries {
         }
     }
 
-    public static class ModelTypes extends LatticeRegistry<LatticeModelType> {
-        private static final ModelTypes BUILT_IN = createModelTypes(LatticeApi.MOD_ID);
+    public static class Types extends LatticeRegistry<LatticeType> {
+        private static final Types BUILT_IN = createTypes(LatticeApi.MOD_ID);
 
         private static final LatticeItemModelType BASIC_ITEM = BUILT_IN.register("basic_item", LatticeItemModelType.builder());
         private static final LatticeItemModelType HANDHELD_ITEM = BUILT_IN.register("handheld_item", LatticeItemModelType.builder());
         private static final LatticeBlockModelType BASIC_BLOCK = BUILT_IN.register("basic_block", LatticeBlockModelType.builder());
         private static final LatticeBlockModelType WITH_SIDES_BLOCK = BUILT_IN.register("with_sides_block", LatticeBlockModelType.builder());
+        private static final LatticeLootTable LOOT_DROP_SELF = BUILT_IN.register("loot_drop_self", LatticeLootTable.builder());
+        private static final LatticeLootTable LOOT_DROP_OTHER = BUILT_IN.register("loot_drop_other", LatticeLootTable.builder());
+        private static final LatticeLootTable LOOT_DROP_SILK_TOUCH = BUILT_IN.register("loot_drop_silk_touch", LatticeLootTable.builder());
+        private static final LatticeLootTable LOOT_DROP_AMOUNT = BUILT_IN.register("loot_drop_amount", LatticeLootTable.builder());
+        private static final LatticeLootTable LOOT_DROP_NONE = BUILT_IN.register("loot_drop_none", LatticeLootTable.builder());
 
         public static class Item {
-            public static final LatticeItemModelType BASIC = ModelTypes.BASIC_ITEM;
-            public static final LatticeItemModelType HANDHELD = ModelTypes.HANDHELD_ITEM;
+            public static final LatticeItemModelType BASIC = Types.BASIC_ITEM;
+            public static final LatticeItemModelType HANDHELD = Types.HANDHELD_ITEM;
         }
 
         public static class Block {
-            public static final LatticeBlockModelType BASIC = ModelTypes.BASIC_BLOCK;
-            public static final LatticeBlockModelType WITH_SIDES = ModelTypes.WITH_SIDES_BLOCK;
+            public static final LatticeBlockModelType BASIC = Types.BASIC_BLOCK;
+            public static final LatticeBlockModelType WITH_SIDES = Types.WITH_SIDES_BLOCK;
         }
 
-        private ModelTypes(@NotNull String modId) {
+        public static class LootTable {
+            public static final LatticeLootTable SELF = Types.LOOT_DROP_SELF;
+            public static final LatticeLootTable OTHER = Types.LOOT_DROP_OTHER;
+            public static final LatticeLootTable SILK_TOUCH = Types.LOOT_DROP_SILK_TOUCH;
+            public static final LatticeLootTable AMOUNT = Types.LOOT_DROP_AMOUNT;
+            public static final LatticeLootTable NONE = Types.LOOT_DROP_NONE;
+        }
+
+        private Types(@NotNull String modId) {
             super(modId);
         }
 
-        public <I extends LatticeModelType> I register(@NotNull String id, @NotNull LatticeModelType.Builder<I> builder) {
-            I latticeModelType = builder.build(createRegistryId(this, id));
-            this.registryContent.add(latticeModelType);
+        public <I extends LatticeType> I register(@NotNull String id, @NotNull LatticeType.AppendableBuilder<I, ?> builder) {
+            I latticeType = builder.build(createRegistryId(this, id));
+            this.registryContent.add(latticeType);
 
-            return latticeModelType;
+            return latticeType;
         }
 
         @Override
@@ -140,7 +153,7 @@ public class LatticeRegistries {
 
         public <T extends Block, I extends LatticeBlock<T>> I register(@NotNull String id, @NotNull LatticeBlock.AppendableBuilder<T, I, ?> builder) {
             I latticeBlock = builder.build(createRegistryId(this, id), this.BLOCKS.register(id, builder::generate));
-            this.BLOCK_ITEMS.register(id, () -> new BlockItem(latticeBlock.get(), BlockUtils.getBlockItemProperties(builder)));
+            this.BLOCK_ITEMS.register(id, () -> new BlockItem(latticeBlock.get(), builder.blockItemProperties));
             this.registryContent.add(latticeBlock);
 
             return latticeBlock;
@@ -188,7 +201,7 @@ public class LatticeRegistries {
         return new LinkedList<>(tags);
     }
 
-    public static Collection<LatticeModelType> getModelTypes() {
+    public static Collection<LatticeType> getModelTypes() {
         return new LinkedList<>(modelTypes);
     }
 
@@ -216,6 +229,6 @@ public class LatticeRegistries {
     }
 
     public static void register(@NotNull IEventBus modEventBus) {
-        ModelTypes.BUILT_IN.register(modEventBus);
+        Types.BUILT_IN.register(modEventBus);
     }
 }

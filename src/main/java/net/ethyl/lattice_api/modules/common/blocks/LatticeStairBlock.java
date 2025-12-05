@@ -6,7 +6,6 @@ import net.ethyl.lattice_api.modules.base.LatticeBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.StairBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +16,7 @@ import java.util.function.Supplier;
 public class LatticeStairBlock extends LatticeBlock<StairBlock> {
     private final Supplier<Block> defaultBlock;
 
-    private LatticeStairBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<StairBlock> deferredBlock, @NotNull AppendableBuilder<? extends LatticeBlock<StairBlock>, ?> builder) {
+    private LatticeStairBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<StairBlock> deferredBlock, @NotNull AppendableBuilder<StairBlock, ? extends LatticeBlock<StairBlock>, ?> builder) {
         super(registryId, deferredBlock, builder);
         this.defaultBlock = builder.defaultBlock;
     }
@@ -30,27 +29,27 @@ public class LatticeStairBlock extends LatticeBlock<StairBlock> {
         return new Builder(LatticeStairBlock::new, BasicStair::new);
     }
 
-    public static class Builder extends AppendableBuilder<LatticeStairBlock, Builder> {
+    public static class Builder extends AppendableBuilder<StairBlock, LatticeStairBlock, Builder> {
         protected Builder(@NotNull TriFunction<RegistryId, DeferredBlock<StairBlock>, Builder, LatticeStairBlock> latticeFactory, @NotNull Function<Builder, StairBlock> blockFactory) {
             super(latticeFactory, blockFactory);
         }
     }
 
-    public static class AppendableBuilder<I extends LatticeBlock<StairBlock>, B extends AppendableBuilder<I, B>> extends LatticeBlock.AppendableBuilder<StairBlock, I, B> {
+    public static class AppendableBuilder<T extends Block, I extends LatticeBlock<T>, B extends AppendableBuilder<T, I, B>> extends LatticeBlock.AppendableBuilder<T, I, B> {
         public Supplier<Block> defaultBlock = () -> Blocks.STONE;
 
-        protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredBlock<StairBlock>, B, I> latticeFactory, @NotNull Function<B, StairBlock> blockFactory) {
+        protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredBlock<T>, B, I> latticeFactory, @NotNull Function<B, T> blockFactory) {
             super(latticeFactory, blockFactory);
-        }
-
-        public B defaultBlock(@NotNull Block block) {
-            this.defaultBlock = () -> block;
-
-            return this.self();
         }
 
         public B defaultBlock(@NotNull LatticeBlock<?> latticeBlock) {
             this.defaultBlock = latticeBlock::get;
+
+            return this.self();
+        }
+
+        public B defaultBlock(@NotNull Block block) {
+            this.defaultBlock = () -> block;
 
             return this.self();
         }

@@ -15,7 +15,7 @@ public class LatticeTag<T> extends LatticeObject {
     private final TagKey<T> tagKey;
     private final Collection<Supplier<T>> tagContent;
 
-    protected LatticeTag(@NotNull RegistryId registryId, @NotNull TagKey<T> tagKey, @NotNull Builder<T, ? extends LatticeTag<T>, ?> builder) {
+    protected LatticeTag(@NotNull RegistryId registryId, @NotNull TagKey<T> tagKey, @NotNull LatticeTag.AppendableBuilder<T, ? extends LatticeTag<T>, ?> builder) {
         super(registryId);
         this.tagKey = tagKey;
         this.tagContent = builder.tagContent;
@@ -33,7 +33,7 @@ public class LatticeTag<T> extends LatticeObject {
         return this.getTagContent().stream().anyMatch(element -> element.get().equals(instance));
     }
 
-    public static abstract class Builder<T, I extends LatticeTag<T>, B extends Builder<T, I, B>> {
+    public static abstract class AppendableBuilder<T, I extends LatticeTag<T>, B extends AppendableBuilder<T, I, B>> {
         public final Collection<Supplier<T>> tagContent = new LinkedList<>();
         private final TriFunction<RegistryId, TagKey<T>, B, I> latticeFactory;
         private final Function<ResourceLocation, TagKey<T>> tagKeyFactory;
@@ -43,7 +43,7 @@ public class LatticeTag<T> extends LatticeObject {
             return (B) this;
         }
 
-        protected Builder(@NotNull TriFunction<RegistryId, TagKey<T>, B, I> latticeFactory, @NotNull Function<ResourceLocation, TagKey<T>> tagKeyFactory) {
+        protected AppendableBuilder(@NotNull TriFunction<RegistryId, TagKey<T>, B, I> latticeFactory, @NotNull Function<ResourceLocation, TagKey<T>> tagKeyFactory) {
             this.latticeFactory = latticeFactory;
             this.tagKeyFactory = tagKeyFactory;
         }

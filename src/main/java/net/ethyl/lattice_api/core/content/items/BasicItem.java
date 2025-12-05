@@ -1,7 +1,6 @@
 package net.ethyl.lattice_api.core.content.items;
 
 import net.ethyl.lattice_api.core.utils.CoreUtils;
-import net.ethyl.lattice_api.core.utils.ItemUtils;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.ethyl.lattice_api.modules.common.items.LatticeBasicItem;
 import net.minecraft.network.chat.Component;
@@ -16,7 +15,7 @@ public class BasicItem extends Item {
     private final boolean hasDescription;
 
     public BasicItem(@NotNull LatticeBasicItem.AppendableBuilder<? extends LatticeItem<Item>, ?> builder) {
-        super(ItemUtils.getItemProperties(builder));
+        super(builder.itemProperties);
         this.hasDescription = builder.hasDescription;
     }
 

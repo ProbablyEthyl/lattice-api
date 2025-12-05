@@ -1,18 +1,15 @@
 package net.ethyl.lattice_api;
 
-import net.ethyl.lattice_api.core.instances.RegistryId;
-import net.ethyl.lattice_api.core.main.LatticeDataGen;
-import net.ethyl.lattice_api.core.main.LatticeRegistries;
-import net.ethyl.lattice_api.core.utils.ErrUtils;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-
 import com.mojang.logging.LogUtils;
-
+import net.ethyl.lattice_api.core.data.LatticeRegistries;
+import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.utils.ErrUtils;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.ModContainer;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 @Mod(LatticeApi.MOD_ID)
 public class LatticeApi {
@@ -21,7 +18,6 @@ public class LatticeApi {
 
     public LatticeApi(IEventBus modEventBus, ModContainer modContainer) {
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
-
         LatticeRegistries.register(modEventBus);
     }
 

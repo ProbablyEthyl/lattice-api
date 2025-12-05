@@ -1,16 +1,13 @@
 package net.ethyl.lattice_api.core.content.blocks;
 
-import net.ethyl.lattice_api.core.utils.BlockUtils;
 import net.ethyl.lattice_api.core.utils.CoreUtils;
 import net.ethyl.lattice_api.modules.base.LatticeBlock;
 import net.ethyl.lattice_api.modules.common.blocks.LatticeSlabBlock;
-import net.ethyl.lattice_api.modules.common.blocks.LatticeStairBlock;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.world.level.block.StairBlock;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -18,8 +15,8 @@ import java.util.List;
 public class BasicSlab extends SlabBlock {
     private final boolean hasDescription;
 
-    public BasicSlab(@NotNull LatticeSlabBlock.AppendableBuilder<? extends LatticeBlock<SlabBlock>, ?> builder) {
-        super(BlockUtils.getBlockProperties(builder));
+    public BasicSlab(@NotNull LatticeSlabBlock.AppendableBuilder<SlabBlock, ? extends LatticeBlock<SlabBlock>, ?> builder) {
+        super(builder.blockProperties);
         this.hasDescription = builder.hasDescription;
     }
 

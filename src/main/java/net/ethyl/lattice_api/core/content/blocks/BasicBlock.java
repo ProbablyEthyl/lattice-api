@@ -1,6 +1,5 @@
 package net.ethyl.lattice_api.core.content.blocks;
 
-import net.ethyl.lattice_api.core.utils.BlockUtils;
 import net.ethyl.lattice_api.core.utils.CoreUtils;
 import net.ethyl.lattice_api.modules.base.LatticeBlock;
 import net.ethyl.lattice_api.modules.common.blocks.LatticeBasicBlock;
@@ -16,8 +15,8 @@ import java.util.List;
 public class BasicBlock extends Block {
     private final boolean hasDescription;
 
-    public BasicBlock(@NotNull LatticeBasicBlock.AppendableBuilder<? extends LatticeBlock<Block>, ?> builder) {
-        super(BlockUtils.getBlockProperties(builder));
+    public BasicBlock(@NotNull LatticeBasicBlock.AppendableBuilder<Block, ? extends LatticeBlock<Block>, ?> builder) {
+        super(builder.blockProperties);
         this.hasDescription = builder.hasDescription;
     }
 

@@ -14,7 +14,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class LatticeBlockTag extends LatticeTag<Block> {
-    private LatticeBlockTag(@NotNull RegistryId registryId, @NotNull TagKey<Block> tagKey, @NotNull Builder builder) {
+    private LatticeBlockTag(@NotNull RegistryId registryId, @NotNull TagKey<Block> tagKey, @NotNull AppendableBuilder<? extends LatticeTag<Block>, ?> builder) {
         super(registryId, tagKey, builder);
     }
 
@@ -28,7 +28,7 @@ public class LatticeBlockTag extends LatticeTag<Block> {
         }
     }
 
-    public static class AppendableBuilder<I extends LatticeTag<Block>, B extends AppendableBuilder<I, B>> extends LatticeTag.Builder<Block, I, B> {
+    public static class AppendableBuilder<I extends LatticeTag<Block>, B extends AppendableBuilder<I, B>> extends LatticeTag.AppendableBuilder<Block, I, B> {
         protected AppendableBuilder(@NotNull TriFunction<RegistryId, TagKey<Block>, B, I> latticeFactory, @NotNull Function<ResourceLocation, TagKey<Block>> tagKeyFactory) {
             super(latticeFactory, tagKeyFactory);
         }

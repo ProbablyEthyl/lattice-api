@@ -1,6 +1,5 @@
 package net.ethyl.lattice_api.core.content.blocks;
 
-import net.ethyl.lattice_api.core.utils.BlockUtils;
 import net.ethyl.lattice_api.core.utils.CoreUtils;
 import net.ethyl.lattice_api.modules.base.LatticeBlock;
 import net.ethyl.lattice_api.modules.common.blocks.LatticeStairBlock;
@@ -16,8 +15,8 @@ import java.util.List;
 public class BasicStair extends StairBlock {
     private final boolean hasDescription;
 
-    public BasicStair(@NotNull LatticeStairBlock.AppendableBuilder<? extends LatticeBlock<StairBlock>, ?> builder) {
-        super(builder.defaultBlock.get().defaultBlockState(), BlockUtils.getBlockProperties(builder));
+    public BasicStair(@NotNull LatticeStairBlock.AppendableBuilder<StairBlock, ? extends LatticeBlock<StairBlock>, ?> builder) {
+        super(builder.defaultBlock.get().defaultBlockState(), builder.blockProperties);
         this.hasDescription = builder.hasDescription;
     }
 
