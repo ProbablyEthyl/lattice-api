@@ -2,6 +2,7 @@ package net.ethyl.lattice_api.modules.base;
 
 import net.ethyl.lattice_api.core.data.LatticeRegistries;
 import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeToolType;
 import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeBlockModelType;
 import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeLootTable;
 import net.minecraft.world.item.Item;
@@ -19,12 +20,14 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
     protected final DeferredBlock<T> deferredBlock;
     protected final LatticeBlockModelType modelType;
     protected final LatticeLootTable lootType;
+    protected final LatticeToolType toolType;
 
     protected LatticeBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<T> deferredBlock, @NotNull LatticeBlock.AppendableBuilder<T, ? extends LatticeBlock<T>, ?> builder) {
         super(registryId);
         this.deferredBlock = deferredBlock;
         this.modelType = builder.modelType;
         this.lootType = builder.lootType;
+        this.toolType = builder.toolType;
     }
 
     public DeferredBlock<T> getDeferred() {
@@ -47,11 +50,16 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
         return this.lootType;
     }
 
+    public LatticeToolType getToolType() {
+        return this.toolType;
+    }
+
     public static class AppendableBuilder<T extends Block, I extends LatticeBlock<T>, B extends AppendableBuilder<T, I, B>> {
         private final TriFunction<RegistryId, DeferredBlock<T>, B, I> latticeFactory;
         private final Function<B, T> blockFactory;
         private LatticeBlockModelType modelType = LatticeRegistries.Types.Block.BASIC;
         private LatticeLootTable lootType = LatticeRegistries.Types.LootTable.SELF;
+        private LatticeToolType toolType = LatticeRegistries.Types.ToolType.PICKAXE;
         protected boolean hasDescription = false;
         protected final BlockBehaviour.Properties blockProperties = BlockBehaviour.Properties.of().strength(1f);
         protected final Item.Properties blockItemProperties = new Item.Properties().stacksTo(64);
@@ -120,6 +128,12 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
 
         public B lootType(@NotNull LatticeLootTable lootType, @NotNull Supplier<Item> itemSupplier, float minDrops, float maxDrops) {
             this.lootType = lootType.drop(itemSupplier).minDrops(minDrops).maxDrops(maxDrops);
+
+            return this.self();
+        }
+
+        public B toolType(@NotNull LatticeToolType toolType) {
+            this.toolType = toolType;
 
             return this.self();
         }

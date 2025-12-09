@@ -13,6 +13,7 @@ import net.ethyl.lattice_api.modules.common.items.equipment.tools.LatticeBasicPi
 import net.ethyl.lattice_api.modules.common.items.equipment.tools.LatticeBasicShovel;
 import net.ethyl.lattice_api.modules.common.tags.LatticeBlockTag;
 import net.ethyl.lattice_api.modules.common.tags.LatticeItemTag;
+import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeToolType;
 import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeBlockModelType;
 import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeItemModelType;
 import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeLootTable;
@@ -25,6 +26,7 @@ import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
@@ -90,6 +92,26 @@ public class LatticeDataGen {
                     latticeBlockTag.getTagContent().forEach(blockSupplier -> tagAppender.add(blockSupplier.get()));
                 }
             }
+
+            IntrinsicTagAppender<Block> pickaxeTagAppender = this.tag(BlockTags.MINEABLE_WITH_PICKAXE);
+            IntrinsicTagAppender<Block> axeTagAppender = this.tag(BlockTags.MINEABLE_WITH_AXE);
+            IntrinsicTagAppender<Block> shovelTagAppender = this.tag(BlockTags.MINEABLE_WITH_SHOVEL);
+            IntrinsicTagAppender<Block> hoeTagAppender = this.tag(BlockTags.MINEABLE_WITH_HOE);
+
+            for (LatticeBlock<?> latticeBlock : LatticeRegistries.getBlocks()) {
+                LatticeToolType toolType = latticeBlock.getToolType();
+                Block block = latticeBlock.get();
+
+                if (toolType == LatticeRegistries.Types.ToolType.PICKAXE) {
+                    pickaxeTagAppender.add(block);
+                } else if (toolType == LatticeRegistries.Types.ToolType.AXE) {
+                    axeTagAppender.add(block);
+                } else if (toolType == LatticeRegistries.Types.ToolType.SHOVEL) {
+                    shovelTagAppender.add(block);
+                } else if (toolType == LatticeRegistries.Types.ToolType.HOE) {
+                    hoeTagAppender.add(block);
+                }
+            }
         }
     }
 
@@ -117,14 +139,15 @@ public class LatticeDataGen {
             IntrinsicTagAppender<Item> hoeTagAppender = this.tag(ItemTags.HOES);
 
             for (LatticeItem<?> latticeItem : LatticeRegistries.getItems()) {
-                if (latticeItem instanceof LatticeBasicPickaxe latticePickaxe) {
-                    pickaxeTagAppender.add(latticePickaxe.get());
-                } else if (latticeItem instanceof LatticeBasicAxe latticeAxe) {
-                    axeTagAppender.add(latticeAxe.get());
-                } else if (latticeItem instanceof LatticeBasicShovel latticeShovel) {
-                    shovelTagAppender.add(latticeShovel.get());
-                } else if (latticeItem instanceof LatticeBasicHoe latticeHoe) {
-                    hoeTagAppender.add(latticeHoe.get());
+                Item item = latticeItem.get();
+
+                switch (latticeItem) {
+                    case LatticeBasicPickaxe ignored -> pickaxeTagAppender.add(item);
+                    case LatticeBasicAxe ignored -> axeTagAppender.add(item);
+                    case LatticeBasicShovel ignored -> shovelTagAppender.add(item);
+                    case LatticeBasicHoe ignored -> hoeTagAppender.add(item);
+                    default -> {
+                    }
                 }
             }
         }

@@ -28,9 +28,15 @@ public class LatticeApi {
     public static final String MOD_ID = "lattice_api";
     public static final Logger LOGGER = LogUtils.getLogger();
 
+    public static final LatticeRegistries.Blocks BLOCKS = LatticeRegistries.createBlocks(LatticeApi.MOD_ID);
+    public static final LatticeBasicBlock BLOCK = BLOCKS.register("my_block", LatticeBasicBlock.builder().modelType(LatticeRegistries.Types.Block.WITH_SIDES));
+
     public LatticeApi(IEventBus modEventBus, ModContainer modContainer) {
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         LatticeRegistries.register(modEventBus);
+
+        BLOCKS.register(modEventBus);
+        LatticeDataGen.addListeners(modEventBus, LatticeApi.MOD_ID);
     }
 
     public static void invalidIdErr(@NotNull RegistryId registryId) {

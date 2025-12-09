@@ -6,6 +6,7 @@ import net.ethyl.lattice_api.core.utils.RegistryUtils;
 import net.ethyl.lattice_api.modules.base.*;
 import net.ethyl.lattice_api.modules.common.items.equipment.tier.LatticeTier;
 import net.ethyl.lattice_api.modules.common.tabs.LatticeCreativeTab;
+import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeToolType;
 import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeBlockModelType;
 import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeItemModelType;
 import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeLootTable;
@@ -85,6 +86,10 @@ public class LatticeRegistries {
         private static final LatticeLootTable LOOT_DROP_SILK_TOUCH = BUILT_IN.register("loot_drop_silk_touch", LatticeLootTable.builder());
         private static final LatticeLootTable LOOT_DROP_AMOUNT = BUILT_IN.register("loot_drop_amount", LatticeLootTable.builder());
         private static final LatticeLootTable LOOT_DROP_NONE = BUILT_IN.register("loot_drop_none", LatticeLootTable.builder());
+        private static final LatticeToolType TOOL_TYPE_PICKAXE = BUILT_IN.register("tool_type_pickaxe", LatticeToolType.builder());
+        private static final LatticeToolType TOOL_TYPE_AXE = BUILT_IN.register("tool_type_axe", LatticeToolType.builder());
+        private static final LatticeToolType TOOL_TYPE_SHOVEL = BUILT_IN.register("tool_type_shovel", LatticeToolType.builder());
+        private static final LatticeToolType TOOL_TYPE_HOE = BUILT_IN.register("tool_type_hoe", LatticeToolType.builder());
 
         public static class Item {
             public static final LatticeItemModelType BASIC = Types.BASIC_ITEM;
@@ -102,6 +107,13 @@ public class LatticeRegistries {
             public static final LatticeLootTable SILK_TOUCH = Types.LOOT_DROP_SILK_TOUCH;
             public static final LatticeLootTable AMOUNT = Types.LOOT_DROP_AMOUNT;
             public static final LatticeLootTable NONE = Types.LOOT_DROP_NONE;
+        }
+
+        public static class ToolType {
+            public static final LatticeToolType PICKAXE = Types.TOOL_TYPE_PICKAXE;
+            public static final LatticeToolType AXE = Types.TOOL_TYPE_AXE;
+            public static final LatticeToolType SHOVEL = Types.TOOL_TYPE_SHOVEL;
+            public static final LatticeToolType HOE = Types.TOOL_TYPE_HOE;
         }
 
         private Types(@NotNull String modId) {
