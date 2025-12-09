@@ -1,7 +1,7 @@
-package net.ethyl.lattice_api.core.content.items;
+package net.ethyl.lattice_api.core.content.items.items;
 
 import net.ethyl.lattice_api.modules.base.LatticeItem;
-import net.ethyl.lattice_api.modules.common.items.LatticeFuelItem;
+import net.ethyl.lattice_api.modules.common.items.items.LatticeFuelItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -12,8 +12,8 @@ public class FuelItem extends Item {
     private final int burnTicks;
 
     public FuelItem(@NotNull LatticeFuelItem.AppendableBuilder<Item, ? extends LatticeItem<Item>, ?> builder) {
-        super(builder.itemProperties);
-        this.burnTicks = builder.burnTicks;
+        super(builder.getItemProperties());
+        this.burnTicks = builder.getBurnTicks();
     }
 
     @Override

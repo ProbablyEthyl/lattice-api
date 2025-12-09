@@ -4,10 +4,11 @@ import net.ethyl.lattice_api.LatticeApi;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.core.utils.RegistryUtils;
 import net.ethyl.lattice_api.modules.base.*;
+import net.ethyl.lattice_api.modules.common.items.equipment.tier.LatticeTier;
 import net.ethyl.lattice_api.modules.common.tabs.LatticeCreativeTab;
 import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeBlockModelType;
 import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeItemModelType;
-import net.ethyl.lattice_api.modules.common.types.other.LatticeLootTable;
+import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeLootTable;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -26,6 +27,7 @@ public class LatticeRegistries {
     private static final Collection<LatticeItem<?>> items = new LinkedList<>();
     private static final Collection<LatticeBlock<?>> blocks = new LinkedList<>();
     private static final Collection<LatticeCreativeTab> tabs = new LinkedList<>();
+    private static final Collection<LatticeTier> tiers = new LinkedList<>();
 
     public static Tags createTags(@NotNull String modId) {
         return new Tags(modId);
@@ -45,6 +47,10 @@ public class LatticeRegistries {
 
     public static Tabs createTabs(@NotNull String modId) {
         return new Tabs(modId);
+    }
+
+    public static Tiers createTiers(@NotNull String modId) {
+        return new Tiers(modId);
     }
 
     public static class Tags extends LatticeRegistry<LatticeTag<?>> {
@@ -153,7 +159,7 @@ public class LatticeRegistries {
 
         public <T extends Block, I extends LatticeBlock<T>> I register(@NotNull String id, @NotNull LatticeBlock.AppendableBuilder<T, I, ?> builder) {
             I latticeBlock = builder.build(createRegistryId(this, id), this.BLOCKS.register(id, builder::generate));
-            this.BLOCK_ITEMS.register(id, () -> new BlockItem(latticeBlock.get(), builder.blockItemProperties));
+            this.BLOCK_ITEMS.register(id, () -> new BlockItem(latticeBlock.get(), builder.getBlockItemProperties()));
             this.registryContent.add(latticeBlock);
 
             return latticeBlock;
@@ -197,6 +203,27 @@ public class LatticeRegistries {
         }
     }
 
+    public static class Tiers extends LatticeRegistry<LatticeTier> {
+        protected Tiers(@NotNull String modId) {
+            super(modId);
+        }
+
+        public <I extends LatticeTier> I register(@NotNull String id, @NotNull LatticeTier.AppendableBuilder<I, ?> builder) {
+            RegistryId registryId = createRegistryId(this, id);
+            I latticeTier = builder.build(registryId);
+            this.registryContent.add(latticeTier);
+
+            return latticeTier;
+        }
+
+        @Override
+        public void register(@NotNull IEventBus modEventBus) {
+            this.registryContent.forEach(latticeTier -> checkDuplicate(tiers, latticeTier.getRegistryId()));
+
+            tiers.addAll(this.registryContent);
+        }
+    }
+
     public static Collection<LatticeTag<?>> getTags() {
         return new LinkedList<>(tags);
     }
@@ -215,6 +242,10 @@ public class LatticeRegistries {
 
     public static Collection<LatticeCreativeTab> getTabs() {
         return new LinkedList<>(tabs);
+    }
+
+    public static Collection<LatticeTier> getTiers() {
+        return new LinkedList<>(tiers);
     }
 
     public static <R extends LatticeRegistry<? extends LatticeObject>> RegistryId createRegistryId(@NotNull R registry, @NotNull String path) {

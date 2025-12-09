@@ -33,6 +33,12 @@ public class LatticeBlockTag extends LatticeTag<Block> {
             super(latticeFactory, tagKeyFactory);
         }
 
+        public B add(@NotNull LatticeBlockTag latticeBlockTag) {
+            this.keyTagContent.add(latticeBlockTag::get);
+
+            return this.self();
+        }
+
         public B add(@NotNull LatticeBlock<?> latticeBlock) {
             return this.add(latticeBlock::get);
         }

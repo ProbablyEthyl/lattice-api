@@ -16,8 +16,8 @@ public class BasicBlock extends Block {
     private final boolean hasDescription;
 
     public BasicBlock(@NotNull LatticeBasicBlock.AppendableBuilder<Block, ? extends LatticeBlock<Block>, ?> builder) {
-        super(builder.blockProperties);
-        this.hasDescription = builder.hasDescription;
+        super(builder.getBlockProperties());
+        this.hasDescription = builder.getHasDescription();
     }
 
     @Override

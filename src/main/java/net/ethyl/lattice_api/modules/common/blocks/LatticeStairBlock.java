@@ -14,7 +14,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class LatticeStairBlock extends LatticeBlock<StairBlock> {
-    private final Supplier<Block> defaultBlock;
+    protected final Supplier<Block> defaultBlock;
 
     private LatticeStairBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<StairBlock> deferredBlock, @NotNull AppendableBuilder<StairBlock, ? extends LatticeBlock<StairBlock>, ?> builder) {
         super(registryId, deferredBlock, builder);
@@ -36,10 +36,14 @@ public class LatticeStairBlock extends LatticeBlock<StairBlock> {
     }
 
     public static class AppendableBuilder<T extends Block, I extends LatticeBlock<T>, B extends AppendableBuilder<T, I, B>> extends LatticeBlock.AppendableBuilder<T, I, B> {
-        public Supplier<Block> defaultBlock = () -> Blocks.STONE;
+        protected Supplier<Block> defaultBlock = () -> Blocks.STONE;
 
         protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredBlock<T>, B, I> latticeFactory, @NotNull Function<B, T> blockFactory) {
             super(latticeFactory, blockFactory);
+        }
+
+        public Supplier<Block> getDefaultBlock() {
+            return this.defaultBlock;
         }
 
         public B defaultBlock(@NotNull LatticeBlock<?> latticeBlock) {

@@ -13,7 +13,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class LatticeSlabBlock extends LatticeBlock<SlabBlock> {
-    private final Supplier<Block> defaultBlock;
+    protected final Supplier<Block> defaultBlock;
 
     private LatticeSlabBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<SlabBlock> deferredBlock, @NotNull AppendableBuilder<SlabBlock, ? extends LatticeBlock<SlabBlock>, ?> builder) {
         super(registryId, deferredBlock, builder);

@@ -1,8 +1,8 @@
-package net.ethyl.lattice_api.core.content.items;
+package net.ethyl.lattice_api.core.content.items.items;
 
 import net.ethyl.lattice_api.core.utils.CoreUtils;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
-import net.ethyl.lattice_api.modules.common.items.LatticeUseableItem;
+import net.ethyl.lattice_api.modules.common.items.items.LatticeUseableItem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -24,11 +24,11 @@ public class UseableItem extends Item {
     private final TriConsumer<Level, Player, InteractionHand> use;
     private final Consumer<UseOnContext> useOn;
 
-    public UseableItem(@NotNull LatticeUseableItem.AppendableBuilder<? extends LatticeItem<Item>, ?> builder) {
-        super(builder.itemProperties);
-        this.hasDescription = builder.hasDescription;
-        this.use = builder.use;
-        this.useOn = builder.useOn;
+    public UseableItem(@NotNull LatticeUseableItem.AppendableBuilder<Item, ? extends LatticeItem<Item>, ?> builder) {
+        super(builder.getItemProperties());
+        this.hasDescription = builder.getHasDescription();
+        this.use = builder.getUse();
+        this.useOn = builder.getUseOn();
     }
 
     @Override

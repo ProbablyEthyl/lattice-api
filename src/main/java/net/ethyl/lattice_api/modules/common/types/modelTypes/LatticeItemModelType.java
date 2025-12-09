@@ -4,11 +4,11 @@ import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class LatticeItemModelType extends LatticeType {
-    protected LatticeItemModelType(@NotNull RegistryId registryId, @NotNull Builder builder) {
-        super(registryId, builder);
+    protected LatticeItemModelType(@NotNull RegistryId registryId) {
+        super(registryId);
     }
 
     public static Builder builder() {
@@ -16,7 +16,7 @@ public class LatticeItemModelType extends LatticeType {
     }
 
     public static class Builder extends AppendableBuilder<LatticeItemModelType, Builder> {
-        private Builder(@NotNull BiFunction<RegistryId, Builder, LatticeItemModelType> latticeFactory) {
+        private Builder(@NotNull Function<RegistryId, LatticeItemModelType> latticeFactory) {
             super(latticeFactory);
         }
     }

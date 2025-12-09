@@ -3,7 +3,7 @@ package net.ethyl.lattice_api.modules.base;
 import net.ethyl.lattice_api.core.data.LatticeRegistries;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeBlockModelType;
-import net.ethyl.lattice_api.modules.common.types.other.LatticeLootTable;
+import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeLootTable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -16,9 +16,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class LatticeBlock<T extends Block> extends LatticeObject {
-    private final DeferredBlock<T> deferredBlock;
-    private final LatticeBlockModelType modelType;
-    private final LatticeLootTable lootType;
+    protected final DeferredBlock<T> deferredBlock;
+    protected final LatticeBlockModelType modelType;
+    protected final LatticeLootTable lootType;
 
     protected LatticeBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<T> deferredBlock, @NotNull LatticeBlock.AppendableBuilder<T, ? extends LatticeBlock<T>, ?> builder) {
         super(registryId);
@@ -52,9 +52,9 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
         private final Function<B, T> blockFactory;
         private LatticeBlockModelType modelType = LatticeRegistries.Types.Block.BASIC;
         private LatticeLootTable lootType = LatticeRegistries.Types.LootTable.SELF;
-        public boolean hasDescription = false;
-        public final BlockBehaviour.Properties blockProperties = BlockBehaviour.Properties.of().strength(1f);
-        public final Item.Properties blockItemProperties = new Item.Properties().stacksTo(64);
+        protected boolean hasDescription = false;
+        protected final BlockBehaviour.Properties blockProperties = BlockBehaviour.Properties.of().strength(1f);
+        protected final Item.Properties blockItemProperties = new Item.Properties().stacksTo(64);
 
         @SuppressWarnings("unchecked")
         protected B self() {
@@ -119,18 +119,23 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
         }
 
         public B lootType(@NotNull LatticeLootTable lootType, @NotNull Supplier<Item> itemSupplier, float minDrops, float maxDrops) {
-            this.lootType = lootType;
-            this.lootType.drop = itemSupplier;
-            this.lootType.minDrops = minDrops;
-            this.lootType.maxDrops = maxDrops;
+            this.lootType = lootType.drop(itemSupplier).minDrops(minDrops).maxDrops(maxDrops);
 
             return this.self();
+        }
+
+        public boolean getHasDescription() {
+            return this.hasDescription;
         }
 
         public B hasDescription() {
             this.hasDescription = true;
 
             return this.self();
+        }
+
+        public BlockBehaviour.Properties getBlockProperties() {
+            return this.blockProperties;
         }
 
         public B strength(float strength) {
@@ -149,6 +154,10 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
             this.blockProperties.ignitedByLava();
 
             return this.self();
+        }
+
+        public Item.Properties getBlockItemProperties() {
+            return this.blockItemProperties;
         }
 
         public B stackSize(int stackSize) {

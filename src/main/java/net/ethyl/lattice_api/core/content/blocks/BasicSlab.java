@@ -16,8 +16,8 @@ public class BasicSlab extends SlabBlock {
     private final boolean hasDescription;
 
     public BasicSlab(@NotNull LatticeSlabBlock.AppendableBuilder<SlabBlock, ? extends LatticeBlock<SlabBlock>, ?> builder) {
-        super(builder.blockProperties);
-        this.hasDescription = builder.hasDescription;
+        super(builder.getBlockProperties());
+        this.hasDescription = builder.getHasDescription();
     }
 
     @Override

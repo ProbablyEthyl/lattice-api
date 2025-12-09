@@ -1,9 +1,21 @@
 package net.ethyl.lattice_api;
 
 import com.mojang.logging.LogUtils;
+import net.ethyl.lattice_api.core.data.LatticeDataGen;
 import net.ethyl.lattice_api.core.data.LatticeRegistries;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.core.utils.ErrUtils;
+import net.ethyl.lattice_api.modules.common.blocks.LatticeBasicBlock;
+import net.ethyl.lattice_api.modules.common.items.equipment.tier.LatticeTier;
+import net.ethyl.lattice_api.modules.common.items.equipment.tools.LatticeBasicAxe;
+import net.ethyl.lattice_api.modules.common.items.equipment.tools.LatticeBasicHoe;
+import net.ethyl.lattice_api.modules.common.items.equipment.tools.LatticeBasicPickaxe;
+import net.ethyl.lattice_api.modules.common.items.equipment.tools.LatticeBasicShovel;
+import net.ethyl.lattice_api.modules.common.tags.LatticeBlockTag;
+import net.ethyl.lattice_api.modules.common.tags.LatticeItemTag;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.item.PickaxeItem;
+import net.minecraft.world.level.block.Blocks;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -27,5 +39,9 @@ public class LatticeApi {
 
     public static void duplicateObjectErr(@NotNull RegistryId registryId) {
         ErrUtils.duplicateObjectErr(registryId);
+    }
+
+    public static void incompleteObjectErr(@NotNull RegistryId registryId) {
+        ErrUtils.IncompleteObjectErr(registryId);
     }
 }

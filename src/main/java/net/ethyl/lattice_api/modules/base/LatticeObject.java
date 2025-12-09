@@ -4,7 +4,7 @@ import net.ethyl.lattice_api.core.instances.RegistryId;
 import org.jetbrains.annotations.NotNull;
 
 public class LatticeObject {
-    private final RegistryId registryId;
+    protected final RegistryId registryId;
 
     protected LatticeObject(@NotNull RegistryId registryId) {
         this.registryId = registryId;

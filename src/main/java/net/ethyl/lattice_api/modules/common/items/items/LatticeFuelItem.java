@@ -1,6 +1,6 @@
-package net.ethyl.lattice_api.modules.common.items;
+package net.ethyl.lattice_api.modules.common.items.items;
 
-import net.ethyl.lattice_api.core.content.items.FuelItem;
+import net.ethyl.lattice_api.core.content.items.items.FuelItem;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.minecraft.world.item.Item;
@@ -26,10 +26,14 @@ public class LatticeFuelItem extends LatticeItem<Item> {
     }
 
     public static class AppendableBuilder<T extends Item, I extends LatticeItem<T>, B extends AppendableBuilder<T, I, B>> extends LatticeItem.AppendableBuilder<T, I, B> {
-        public int burnTicks = 20;
+        protected int burnTicks = 20;
 
         protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredItem<T>, B, I> latticeFactory, @NotNull Function<B, T> itemFactory) {
             super(latticeFactory, itemFactory);
+        }
+
+        public int getBurnTicks() {
+            return this.burnTicks;
         }
 
         public B burnTicks(int burnTicks) {

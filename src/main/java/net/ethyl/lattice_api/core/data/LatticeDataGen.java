@@ -7,11 +7,15 @@ import net.ethyl.lattice_api.modules.base.LatticeTag;
 import net.ethyl.lattice_api.modules.common.blocks.LatticeBasicBlock;
 import net.ethyl.lattice_api.modules.common.blocks.LatticeSlabBlock;
 import net.ethyl.lattice_api.modules.common.blocks.LatticeStairBlock;
+import net.ethyl.lattice_api.modules.common.items.equipment.tools.LatticeBasicAxe;
+import net.ethyl.lattice_api.modules.common.items.equipment.tools.LatticeBasicHoe;
+import net.ethyl.lattice_api.modules.common.items.equipment.tools.LatticeBasicPickaxe;
+import net.ethyl.lattice_api.modules.common.items.equipment.tools.LatticeBasicShovel;
 import net.ethyl.lattice_api.modules.common.tags.LatticeBlockTag;
 import net.ethyl.lattice_api.modules.common.tags.LatticeItemTag;
 import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeBlockModelType;
 import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeItemModelType;
-import net.ethyl.lattice_api.modules.common.types.other.LatticeLootTable;
+import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeLootTable;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -21,6 +25,7 @@ import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -81,6 +86,7 @@ public class LatticeDataGen {
                 if (latticeTag instanceof LatticeBlockTag latticeBlockTag) {
                     IntrinsicTagAppender<Block> tagAppender = tag(latticeBlockTag.get());
 
+                    latticeBlockTag.getKeyTagContent().forEach(tagKeySupplier -> tagAppender.addTag(tagKeySupplier.get()));
                     latticeBlockTag.getTagContent().forEach(blockSupplier -> tagAppender.add(blockSupplier.get()));
                 }
             }
@@ -97,10 +103,28 @@ public class LatticeDataGen {
             for (LatticeTag<?> latticeTag : LatticeRegistries.getTags()) {
                 if (isNotFromMod(latticeTag, this.modId)) continue;
 
-                if (latticeTag instanceof LatticeItemTag lItemTag) {
-                    IntrinsicTagAppender<Item> tagAppender = tag(lItemTag.get());
+                if (latticeTag instanceof LatticeItemTag latticeItemTag) {
+                    IntrinsicTagAppender<Item> tagAppender = this.tag(latticeItemTag.get());
 
-                    lItemTag.getTagContent().forEach(itemSupplier -> tagAppender.add(itemSupplier.get()));
+                    latticeItemTag.getKeyTagContent().forEach(tagKeySupplier -> tagAppender.addTag(tagKeySupplier.get()));
+                    latticeItemTag.getTagContent().forEach(itemSupplier -> tagAppender.add(itemSupplier.get()));
+                }
+            }
+
+            IntrinsicTagAppender<Item> pickaxeTagAppender = this.tag(ItemTags.PICKAXES);
+            IntrinsicTagAppender<Item> axeTagAppender = this.tag(ItemTags.AXES);
+            IntrinsicTagAppender<Item> shovelTagAppender = this.tag(ItemTags.SHOVELS);
+            IntrinsicTagAppender<Item> hoeTagAppender = this.tag(ItemTags.HOES);
+
+            for (LatticeItem<?> latticeItem : LatticeRegistries.getItems()) {
+                if (latticeItem instanceof LatticeBasicPickaxe latticePickaxe) {
+                    pickaxeTagAppender.add(latticePickaxe.get());
+                } else if (latticeItem instanceof LatticeBasicAxe latticeAxe) {
+                    axeTagAppender.add(latticeAxe.get());
+                } else if (latticeItem instanceof LatticeBasicShovel latticeShovel) {
+                    shovelTagAppender.add(latticeShovel.get());
+                } else if (latticeItem instanceof LatticeBasicHoe latticeHoe) {
+                    hoeTagAppender.add(latticeHoe.get());
                 }
             }
         }
@@ -119,8 +143,8 @@ public class LatticeDataGen {
                 Item item = latticeItem.get();
                 LatticeItemModelType modelType = latticeItem.getModelType();
 
-                if (modelType == LatticeRegistries.Types.Item.BASIC) basicItem(item);
-                else if (modelType == LatticeRegistries.Types.Item.HANDHELD) handheldItem(item);
+                if (modelType == LatticeRegistries.Types.Item.BASIC) this.basicItem(item);
+                else if (modelType == LatticeRegistries.Types.Item.HANDHELD) this.handheldItem(item);
             }
         }
     }
@@ -249,9 +273,9 @@ public class LatticeDataGen {
                 } else if (lootType == LatticeRegistries.Types.LootTable.SILK_TOUCH) {
                     this.dropWhenSilkTouch(block);
                 } else if (lootType == LatticeRegistries.Types.LootTable.OTHER) {
-                    this.dropOther(block, lootType.drop.get());
+                    this.dropOther(block, lootType.getDrop().get());
                 } else if (lootType == LatticeRegistries.Types.LootTable.AMOUNT) {
-                    this.add(block, sBlock -> this.createAmountDrops(sBlock, lootType.drop.get(), lootType.minDrops, lootType.maxDrops));
+                    this.add(block, sBlock -> this.createAmountDrops(sBlock, lootType.getDrop().get(), lootType.getMinDrops(), lootType.getMaxDrops()));
                 }
             }
         }
@@ -268,11 +292,11 @@ public class LatticeDataGen {
         }
     }
 
-    public static void addListeners(@NotNull IEventBus modEventBus, @NotNull String modId) {
-        modEventBus.addListener((GatherDataEvent event) -> onGatherDataEvent(event, modId));
-    }
-
     public static <I extends LatticeObject> boolean isNotFromMod(@NotNull I latticeObject, @NotNull String modId) {
         return !latticeObject.getModId().equals(modId);
+    }
+
+    public static void addListeners(@NotNull IEventBus modEventBus, @NotNull String modId) {
+        modEventBus.addListener((GatherDataEvent event) -> onGatherDataEvent(event, modId));
     }
 }

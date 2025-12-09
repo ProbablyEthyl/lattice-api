@@ -11,8 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Function;
 
 public class LatticeItem<T extends Item> extends LatticeObject {
-    private final DeferredItem<T> deferredItem;
-    private final LatticeItemModelType modelType;
+    protected final DeferredItem<T> deferredItem;
+    protected final LatticeItemModelType modelType;
 
     protected LatticeItem(@NotNull RegistryId registryId, @NotNull DeferredItem<T> deferredItem, @NotNull LatticeItem.AppendableBuilder<T, ? extends LatticeItem<T>, ?> builder) {
         super(registryId);
@@ -35,9 +35,9 @@ public class LatticeItem<T extends Item> extends LatticeObject {
     public static class AppendableBuilder<T extends Item, I extends LatticeItem<T>, B extends AppendableBuilder<T, I, B>> {
         private final TriFunction<RegistryId, DeferredItem<T>, B, I> latticeFactory;
         private final Function<B, T> itemFactory;
-        public LatticeItemModelType modelType = LatticeRegistries.Types.Item.BASIC;
-        public boolean hasDescription = false;
-        public final Item.Properties itemProperties = new Item.Properties().stacksTo(64);
+        private LatticeItemModelType modelType = LatticeRegistries.Types.Item.BASIC;
+        protected boolean hasDescription = false;
+        protected final Item.Properties itemProperties = new Item.Properties().stacksTo(64);
 
         @SuppressWarnings("unchecked")
         protected B self() {
@@ -58,10 +58,19 @@ public class LatticeItem<T extends Item> extends LatticeObject {
 
             return this.self();
         }
+
+        public boolean getHasDescription() {
+            return this.hasDescription;
+        }
+
         public B hasDescription() {
             this.hasDescription = true;
 
             return this.self();
+        }
+
+        public Item.Properties getItemProperties() {
+            return this.itemProperties;
         }
 
         public B stackSize(int stackSize) {

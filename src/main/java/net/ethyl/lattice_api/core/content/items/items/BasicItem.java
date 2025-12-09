@@ -1,8 +1,8 @@
-package net.ethyl.lattice_api.core.content.items;
+package net.ethyl.lattice_api.core.content.items.items;
 
 import net.ethyl.lattice_api.core.utils.CoreUtils;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
-import net.ethyl.lattice_api.modules.common.items.LatticeBasicItem;
+import net.ethyl.lattice_api.modules.common.items.items.LatticeBasicItem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -14,9 +14,9 @@ import java.util.List;
 public class BasicItem extends Item {
     private final boolean hasDescription;
 
-    public BasicItem(@NotNull LatticeBasicItem.AppendableBuilder<? extends LatticeItem<Item>, ?> builder) {
-        super(builder.itemProperties);
-        this.hasDescription = builder.hasDescription;
+    public BasicItem(@NotNull LatticeBasicItem.AppendableBuilder<Item, ? extends LatticeItem<Item>, ?> builder) {
+        super(builder.getItemProperties());
+        this.hasDescription = builder.getHasDescription();
     }
 
     @Override

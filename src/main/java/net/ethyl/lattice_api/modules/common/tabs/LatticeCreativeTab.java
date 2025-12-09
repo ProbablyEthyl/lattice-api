@@ -20,7 +20,7 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class LatticeCreativeTab extends LatticeObject {
-    private final Supplier<CreativeModeTab> tabSupplier;
+    protected final Supplier<CreativeModeTab> tabSupplier;
 
     protected LatticeCreativeTab(@NotNull RegistryId registryId, @NotNull Supplier<CreativeModeTab> tabSupplier) {
         super(registryId);
@@ -43,8 +43,8 @@ public class LatticeCreativeTab extends LatticeObject {
 
     public static class AppendableBuilder<I extends LatticeCreativeTab, B extends AppendableBuilder<I, B>> {
         private final BiFunction<RegistryId, Supplier<CreativeModeTab>, I> latticeFactory;
-        public Collection<Supplier<ItemLike>> tabContent = new LinkedList<>();
-        public Supplier<ItemStack> icon = () -> new ItemStack(Items.STONE);
+        protected Collection<Supplier<ItemLike>> tabContent = new LinkedList<>();
+        protected Supplier<ItemStack> icon = () -> new ItemStack(Items.STONE);
 
         @SuppressWarnings("unchecked")
         protected B self() {
@@ -54,6 +54,10 @@ public class LatticeCreativeTab extends LatticeObject {
         protected AppendableBuilder(@NotNull BiFunction<RegistryId, Supplier<CreativeModeTab>, I> latticeFactory) {
             this.latticeFactory = latticeFactory;
 
+        }
+
+        public Collection<Supplier<ItemLike>> getTabContent() {
+            return this.tabContent;
         }
 
         public B add(@NotNull LatticeItem<?> latticeItem) {
@@ -88,6 +92,10 @@ public class LatticeCreativeTab extends LatticeObject {
             this.tabContent.add(itemLikeSupplier);
 
             return this.self();
+        }
+
+        public Supplier<ItemStack> getIcon() {
+            return this.icon;
         }
 
         public B icon(@NotNull LatticeItem<?> latticeItem) {

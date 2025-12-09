@@ -1,6 +1,6 @@
-package net.ethyl.lattice_api.modules.common.items;
+package net.ethyl.lattice_api.modules.common.items.items;
 
-import net.ethyl.lattice_api.core.content.items.FoodItem;
+import net.ethyl.lattice_api.core.content.items.items.FoodItem;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeBlock;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
@@ -14,7 +14,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class LatticeFoodItem extends LatticeItem<Item> {
-    protected LatticeFoodItem(@NotNull RegistryId registryId, @NotNull DeferredItem<Item> deferredItem, @NotNull AppendableBuilder<? extends LatticeItem<Item>, ?> builder) {
+    protected LatticeFoodItem(@NotNull RegistryId registryId, @NotNull DeferredItem<Item> deferredItem, @NotNull AppendableBuilder<Item, ? extends LatticeItem<Item>, ?> builder) {
         super(registryId, deferredItem, builder);
     }
 
@@ -22,17 +22,21 @@ public class LatticeFoodItem extends LatticeItem<Item> {
         return new Builder(LatticeFoodItem::new, FoodItem::new);
     }
 
-    public static class Builder extends AppendableBuilder<LatticeFoodItem, Builder> {
+    public static class Builder extends AppendableBuilder<Item, LatticeFoodItem, Builder> {
         protected Builder(@NotNull TriFunction<RegistryId, DeferredItem<Item>, Builder, LatticeFoodItem> latticeFactory, @NotNull Function<Builder, Item> itemFactory) {
             super(latticeFactory, itemFactory);
         }
     }
 
-    public static class AppendableBuilder<I extends LatticeFoodItem, B extends AppendableBuilder<I, B>> extends LatticeItem.AppendableBuilder<Item, I, B> {
-        public final FoodProperties.Builder foodProperties = new FoodProperties.Builder().nutrition(5).saturationModifier(5f);
+    public static class AppendableBuilder<T extends Item, I extends LatticeItem<T>, B extends AppendableBuilder<T, I, B>> extends LatticeItem.AppendableBuilder<T, I, B> {
+        protected final FoodProperties.Builder foodProperties = new FoodProperties.Builder().nutrition(5).saturationModifier(5f);
 
-        protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredItem<Item>, B, I> latticeFactory, @NotNull Function<B, Item> itemFactory) {
+        protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredItem<T>, B, I> latticeFactory, @NotNull Function<B, T> itemFactory) {
             super(latticeFactory, itemFactory);
+        }
+
+        public FoodProperties.Builder getFoodProperties() {
+            return this.foodProperties;
         }
 
         public B nutrition(int nutrition) {

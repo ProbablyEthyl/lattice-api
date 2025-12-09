@@ -20,8 +20,8 @@ public class RegistryUtils {
     public static CreativeModeTab createTab(@NotNull LatticeCreativeTab.AppendableBuilder<? extends LatticeCreativeTab, ?> builder, @NotNull RegistryId registryId) {
         return CreativeModeTab.builder()
                 .title(Component.translatable("tab." + registryId.getNamespace() + "." + registryId.getPath()))
-                .icon(builder.icon)
-                .displayItems(((itemDisplayParameters, output) -> builder.tabContent.forEach(itemLikeSupplier -> output.accept(itemLikeSupplier.get()))))
+                .icon(builder.getIcon())
+                .displayItems(((itemDisplayParameters, output) -> builder.getTabContent().forEach(itemLikeSupplier -> output.accept(itemLikeSupplier.get()))))
                 .build();
     }
 }

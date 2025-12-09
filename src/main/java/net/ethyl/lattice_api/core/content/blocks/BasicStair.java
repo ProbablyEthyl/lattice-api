@@ -16,8 +16,8 @@ public class BasicStair extends StairBlock {
     private final boolean hasDescription;
 
     public BasicStair(@NotNull LatticeStairBlock.AppendableBuilder<StairBlock, ? extends LatticeBlock<StairBlock>, ?> builder) {
-        super(builder.defaultBlock.get().defaultBlockState(), builder.blockProperties);
-        this.hasDescription = builder.hasDescription;
+        super(builder.getDefaultBlock().get().defaultBlockState(), builder.getBlockProperties());
+        this.hasDescription = builder.getHasDescription();
     }
 
     @Override

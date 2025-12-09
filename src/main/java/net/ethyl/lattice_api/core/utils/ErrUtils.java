@@ -11,4 +11,8 @@ public class ErrUtils {
     public static void duplicateObjectErr(@NotNull RegistryId registryId) {
         throw new InstantiationError("The mod '" + registryId.getNamespace() + "' tried to register an already existing object! Key: '" + registryId.getPath() + "'!");
     }
+
+    public static void IncompleteObjectErr(@NotNull RegistryId registryId) {
+        throw new InstantiationError("The mod '" + registryId.getNamespace() + "' tried to register an incomplete object! Key: '" + registryId.getPath() + "'!");
+    }
 }
