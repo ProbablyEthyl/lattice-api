@@ -6,12 +6,14 @@ import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.ethyl.lattice_api.modules.base.LatticeObject;
 import net.ethyl.lattice_api.modules.common.tags.LatticeBlockTag;
 import net.ethyl.lattice_api.modules.common.tags.LatticeItemTag;
+import net.minecraft.data.tags.VanillaBlockTagsProvider;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;

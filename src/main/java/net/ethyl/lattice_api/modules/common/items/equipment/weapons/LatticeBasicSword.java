@@ -1,28 +1,30 @@
-package net.ethyl.lattice_api.modules.common.items.equipment.tools;
+package net.ethyl.lattice_api.modules.common.items.equipment.weapons;
 
 import net.ethyl.lattice_api.core.content.items.equipment.tools.BasicShovel;
-import net.ethyl.lattice_api.core.data.LatticeRegistries;
+import net.ethyl.lattice_api.core.content.items.equipment.weapons.BasicSword;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
+import net.ethyl.lattice_api.modules.common.items.equipment.tools.LatticeBasicPickaxe;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ShovelItem;
+import net.minecraft.world.item.SwordItem;
 import net.neoforged.neoforge.registries.DeferredItem;
 import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
-public class LatticeBasicShovel extends LatticeItem<ShovelItem> {
-    protected LatticeBasicShovel(@NotNull RegistryId registryId, @NotNull DeferredItem<ShovelItem> deferredItem, @NotNull AppendableBuilder<ShovelItem, ? extends LatticeItem<ShovelItem>, ?> builder) {
+public class LatticeBasicSword extends LatticeItem<SwordItem> {
+    protected LatticeBasicSword(@NotNull RegistryId registryId, @NotNull DeferredItem<SwordItem> deferredItem, @NotNull AppendableBuilder<SwordItem, ? extends LatticeItem<SwordItem>, ?> builder) {
         super(registryId, deferredItem, builder);
     }
 
     public static Builder builder() {
-        return new Builder(LatticeBasicShovel::new, BasicShovel::new);
+        return new Builder(LatticeBasicSword::new, BasicSword::new);
     }
 
-    public static class Builder extends AppendableBuilder<ShovelItem, LatticeBasicShovel, Builder> {
-        protected Builder(@NotNull TriFunction<RegistryId, DeferredItem<ShovelItem>, Builder, LatticeBasicShovel> latticeFactory, @NotNull Function<Builder, ShovelItem> itemFactory) {
+    public static class Builder extends AppendableBuilder<SwordItem, LatticeBasicSword, Builder> {
+        protected Builder(@NotNull TriFunction<RegistryId, DeferredItem<SwordItem>, Builder, LatticeBasicSword> latticeFactory, @NotNull Function<Builder, SwordItem> itemFactory) {
             super(latticeFactory, itemFactory);
         }
     }

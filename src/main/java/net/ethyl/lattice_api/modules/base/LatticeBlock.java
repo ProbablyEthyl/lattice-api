@@ -170,6 +170,24 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
             return this.self();
         }
 
+        public B requiresCorrectTool() {
+            this.blockProperties.requiresCorrectToolForDrops();
+
+            return this.self();
+        }
+
+        public B noCollision() {
+            this.blockProperties.noCollission();
+
+            return this.self();
+        }
+
+        public B noOcclusion() {
+            this.blockProperties.noOcclusion();
+
+            return this.self();
+        }
+
         public Item.Properties getBlockItemProperties() {
             return this.blockItemProperties;
         }

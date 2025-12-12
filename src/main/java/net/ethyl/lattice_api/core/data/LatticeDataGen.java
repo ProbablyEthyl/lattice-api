@@ -5,21 +5,23 @@ import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.ethyl.lattice_api.modules.base.LatticeObject;
 import net.ethyl.lattice_api.modules.base.LatticeTag;
 import net.ethyl.lattice_api.modules.common.blocks.LatticeBasicBlock;
+import net.ethyl.lattice_api.modules.common.blocks.LatticeWallBlock;
 import net.ethyl.lattice_api.modules.common.blocks.LatticeSlabBlock;
 import net.ethyl.lattice_api.modules.common.blocks.LatticeStairBlock;
 import net.ethyl.lattice_api.modules.common.items.equipment.tools.LatticeBasicAxe;
 import net.ethyl.lattice_api.modules.common.items.equipment.tools.LatticeBasicHoe;
 import net.ethyl.lattice_api.modules.common.items.equipment.tools.LatticeBasicPickaxe;
 import net.ethyl.lattice_api.modules.common.items.equipment.tools.LatticeBasicShovel;
+import net.ethyl.lattice_api.modules.common.items.equipment.weapons.LatticeBasicSword;
 import net.ethyl.lattice_api.modules.common.tags.LatticeBlockTag;
 import net.ethyl.lattice_api.modules.common.tags.LatticeItemTag;
 import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeToolType;
 import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeBlockModelType;
 import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeItemModelType;
 import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeLootTable;
+import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.BlockLootSubProvider;
@@ -30,16 +32,18 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.state.properties.SlabType;
+import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
-import net.minecraft.world.level.storage.loot.functions.ApplyBonusCount;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
@@ -55,6 +59,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 public class LatticeDataGen {
     public static void onGatherDataEvent(GatherDataEvent event, String modId) {
@@ -93,14 +98,21 @@ public class LatticeDataGen {
                 }
             }
 
+            IntrinsicTagAppender<Block> wallsTagAppender = this.tag(BlockTags.WALLS);
             IntrinsicTagAppender<Block> pickaxeTagAppender = this.tag(BlockTags.MINEABLE_WITH_PICKAXE);
             IntrinsicTagAppender<Block> axeTagAppender = this.tag(BlockTags.MINEABLE_WITH_AXE);
             IntrinsicTagAppender<Block> shovelTagAppender = this.tag(BlockTags.MINEABLE_WITH_SHOVEL);
             IntrinsicTagAppender<Block> hoeTagAppender = this.tag(BlockTags.MINEABLE_WITH_HOE);
 
             for (LatticeBlock<?> latticeBlock : LatticeRegistries.getBlocks()) {
+                if (isNotFromMod(latticeBlock, this.modId)) continue;
+
                 LatticeToolType toolType = latticeBlock.getToolType();
                 Block block = latticeBlock.get();
+
+                if (latticeBlock instanceof LatticeWallBlock) {
+                    wallsTagAppender.add(block);
+                }
 
                 if (toolType == LatticeRegistries.Types.ToolType.PICKAXE) {
                     pickaxeTagAppender.add(block);
@@ -133,15 +145,19 @@ public class LatticeDataGen {
                 }
             }
 
+            IntrinsicTagAppender<Item> swordTagAppender = this.tag(ItemTags.SWORDS);
             IntrinsicTagAppender<Item> pickaxeTagAppender = this.tag(ItemTags.PICKAXES);
             IntrinsicTagAppender<Item> axeTagAppender = this.tag(ItemTags.AXES);
             IntrinsicTagAppender<Item> shovelTagAppender = this.tag(ItemTags.SHOVELS);
             IntrinsicTagAppender<Item> hoeTagAppender = this.tag(ItemTags.HOES);
 
             for (LatticeItem<?> latticeItem : LatticeRegistries.getItems()) {
+                if (isNotFromMod(latticeItem, this.modId)) continue;
+
                 Item item = latticeItem.get();
 
                 switch (latticeItem) {
+                    case LatticeBasicSword ignored -> swordTagAppender.add(item);
                     case LatticeBasicPickaxe ignored -> pickaxeTagAppender.add(item);
                     case LatticeBasicAxe ignored -> axeTagAppender.add(item);
                     case LatticeBasicShovel ignored -> shovelTagAppender.add(item);
@@ -154,14 +170,17 @@ public class LatticeDataGen {
     }
 
     public static class ItemModelGenerator extends ItemModelProvider {
+        private final String modId;
+
         public ItemModelGenerator(PackOutput output, String modId, ExistingFileHelper existingFileHelper) {
             super(output, modId, existingFileHelper);
+            this.modId = modId;
         }
 
         @Override
         protected void registerModels() {
             for (LatticeItem<?> latticeItem : LatticeRegistries.getItems()) {
-                if (isNotFromMod(latticeItem, this.modid)) continue;
+                if (isNotFromMod(latticeItem, this.modId)) continue;
 
                 Item item = latticeItem.get();
                 LatticeItemModelType modelType = latticeItem.getModelType();
@@ -169,6 +188,37 @@ public class LatticeDataGen {
                 if (modelType == LatticeRegistries.Types.Item.BASIC) this.basicItem(item);
                 else if (modelType == LatticeRegistries.Types.Item.HANDHELD) this.handheldItem(item);
             }
+
+            for (LatticeBlock<?> latticeBlock : LatticeRegistries.getBlocks()) {
+                if (isNotFromMod(latticeBlock, this.modId)) continue;
+
+                if (latticeBlock instanceof LatticeWallBlock latticeWallBlock) {
+                    this.wallItem(latticeWallBlock);
+                }
+            }
+        }
+
+        private String getPath(@NotNull LatticeBlock<?> latticeBlock) {
+            return this.getPath(latticeBlock.get());
+        }
+
+        private String getPath(@NotNull Block block) {
+            return BuiltInRegistries.BLOCK.getKey(block).getPath();
+        }
+
+        private String getModId(@NotNull LatticeBlock<?> latticeBlock) {
+            return this.getModId(latticeBlock.get());
+        }
+
+        private String getModId(@NotNull Block block) {
+            return BuiltInRegistries.BLOCK.getKey(block).getNamespace();
+        }
+
+        protected void wallItem(@NotNull LatticeWallBlock latticeWallBlock) {
+            Block baseBlock = latticeWallBlock.getDefaultBlock().get();
+
+            this.withExistingParent(this.getPath(latticeWallBlock), this.mcLoc("block/wall_inventory"))
+                    .texture("wall", ResourceLocation.fromNamespaceAndPath(this.getModId(baseBlock), "block/" + this.getPath(baseBlock)));
         }
     }
 
@@ -197,23 +247,35 @@ public class LatticeDataGen {
                         this.simpleBlockWithItem(block, this.models().cubeColumn(path, getSide(latticeBlock), getBase(latticeBlock)));
                     }
                 } else {
-                    if (latticeBlock instanceof LatticeStairBlock latticeStairBlock) {
-                        StairBlock stairBlock = latticeStairBlock.get();
-                        Block defaultBlock = latticeStairBlock.getDefaultBlock().get();
+                    switch (latticeBlock) {
+                        case LatticeStairBlock latticeStairBlock -> {
+                            StairBlock stairBlock = latticeStairBlock.get();
+                            Block defaultBlock = latticeStairBlock.getDefaultBlock().get();
 
-                        if (modelType == LatticeRegistries.Types.Block.BASIC) {
-                            this.stairsBlock(stairBlock, this.blockTexture(latticeStairBlock.getDefaultBlock().get()));
-                        } else if (modelType == LatticeRegistries.Types.Block.WITH_SIDES) {
-                            this.stairsBlockWithRenderType(stairBlock, this.getSide(defaultBlock), this.getBase(defaultBlock), this.getBase(defaultBlock), "cutout");
+                            if (modelType == LatticeRegistries.Types.Block.BASIC) {
+                                this.stairsBlock(stairBlock, this.blockTexture(latticeStairBlock.getDefaultBlock().get()));
+                            } else if (modelType == LatticeRegistries.Types.Block.WITH_SIDES) {
+                                this.stairsBlockWithRenderType(stairBlock, this.getSide(defaultBlock), this.getBase(defaultBlock), this.getBase(defaultBlock), "cutout");
+                            }
                         }
-                    } else if (latticeBlock instanceof LatticeSlabBlock latticeSlabBlock) {
-                        SlabBlock slabBlock = latticeSlabBlock.get();
-                        Block defaultBlock = latticeSlabBlock.getDefaultBlock().get();
+                        case LatticeSlabBlock latticeSlabBlock -> {
+                            SlabBlock slabBlock = latticeSlabBlock.get();
+                            Block defaultBlock = latticeSlabBlock.getDefaultBlock().get();
 
-                        if (modelType == LatticeRegistries.Types.Block.BASIC) {
-                            this.slabBlock(slabBlock, this.getBase(defaultBlock), this.getBase(defaultBlock));
-                        } else if (modelType == LatticeRegistries.Types.Block.WITH_SIDES) {
-                            this.slabBlock(slabBlock, this.getBase(defaultBlock), this.getSlab(defaultBlock), this.getBase(defaultBlock), this.getBase(defaultBlock));
+                            if (modelType == LatticeRegistries.Types.Block.BASIC) {
+                                this.slabBlock(slabBlock, this.getBase(defaultBlock), this.getBase(defaultBlock));
+                            } else if (modelType == LatticeRegistries.Types.Block.WITH_SIDES) {
+                                this.slabBlock(slabBlock, this.getBase(defaultBlock), this.getSlab(defaultBlock), this.getBase(defaultBlock), this.getBase(defaultBlock));
+                            }
+                        }
+                        case LatticeWallBlock latticeWallBlock -> {
+                            WallBlock wallBlock = latticeWallBlock.get();
+                            Block defaultBlock = latticeWallBlock.getDefaultBlock().get();
+                            this.wallBlock(wallBlock, this.blockTexture(defaultBlock));
+
+                            continue;
+                        }
+                        default -> {
                         }
                     }
 
@@ -291,22 +353,126 @@ public class LatticeDataGen {
                 LatticeLootTable lootType = latticeBlock.getLootType();
                 Block block = latticeBlock.get();
 
-                if (lootType == LatticeRegistries.Types.LootTable.SELF) {
-                    this.dropSelf(block);
-                } else if (lootType == LatticeRegistries.Types.LootTable.SILK_TOUCH) {
-                    this.dropWhenSilkTouch(block);
-                } else if (lootType == LatticeRegistries.Types.LootTable.OTHER) {
-                    this.dropOther(block, lootType.getDrop().get());
-                } else if (lootType == LatticeRegistries.Types.LootTable.AMOUNT) {
-                    this.add(block, sBlock -> this.createAmountDrops(sBlock, lootType.getDrop().get(), lootType.getMinDrops(), lootType.getMaxDrops()));
+                if (latticeBlock instanceof LatticeSlabBlock latticeSlabBlock) {
+                    SlabBlock slabBlock = latticeSlabBlock.get();
+
+                    if (lootType == LatticeRegistries.Types.LootTable.SELF) {
+                        this.add(slabBlock, this.createSlabDrops(latticeSlabBlock, null, 1.0f, 1.0f, false));
+                    } else if (lootType == LatticeRegistries.Types.LootTable.SILK_TOUCH) {
+                        this.add(slabBlock, this.createSlabDrops(latticeSlabBlock, null, 1.0f, 1.0f, true));
+                    } else if (lootType == LatticeRegistries.Types.LootTable.OTHER) {
+                        this.add(slabBlock, this.createSlabDrops(latticeSlabBlock, lootType.getDrop(), 1.0f, 1.0f, false));
+                    } else if (lootType == LatticeRegistries.Types.LootTable.AMOUNT) {
+                        this.add(slabBlock, this.createSlabDrops(latticeSlabBlock, lootType.getDrop(), lootType.getMinDrops(), lootType.getMaxDrops(), false));
+                    }
+                } else {
+                    if (lootType == LatticeRegistries.Types.LootTable.SELF) {
+                        this.add(block, this.createDrops(latticeBlock, null, 1.0f, 1.0f, false));
+                    } else if (lootType == LatticeRegistries.Types.LootTable.SILK_TOUCH) {
+                        this.add(block, this.createDrops(latticeBlock, null, 1.0f, 1.0f, true));
+                    } else if (lootType == LatticeRegistries.Types.LootTable.OTHER) {
+                        this.add(block, this.createDrops(latticeBlock, lootType.getDrop(), 1.0f, 1.0f, false));
+                    } else if (lootType == LatticeRegistries.Types.LootTable.AMOUNT) {
+                        this.add(block, this.createDrops(latticeBlock, lootType.getDrop(), lootType.getMinDrops(), lootType.getMaxDrops(), false));
+                    }
                 }
             }
         }
 
-        private LootTable.Builder createAmountDrops(Block block, Item item, float minDrops, float maxDrops) {
-            HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
+        private LootTable.Builder createSlabDrops(@NotNull LatticeSlabBlock latticeSlabBlock, @Nullable Supplier<Item> dropItem, float minDrops, float maxDrops, boolean silkTouchRequired) {
+            SlabBlock slabBlock = latticeSlabBlock.get();
+            Item drop = dropItem == null ? slabBlock.asItem() : dropItem.get();
 
-            return this.createSilkTouchDispatchTable(block, this.applyExplosionDecay(block, LootItem.lootTableItem(item).apply(SetItemCountFunction.setCount(UniformGenerator.between(minDrops, maxDrops))).apply(ApplyBonusCount.addOreBonusCount(registryLookup.getOrThrow(Enchantments.FORTUNE)))));
+            return LootTable.lootTable()
+                    .withPool(
+                            silkTouchRequired ?
+                                    LootPool.lootPool()
+                                            .add(
+                                                    this.applyExplosionDecay(
+                                                            slabBlock,
+                                                            LootItem.lootTableItem(slabBlock)
+                                                                    .when(this.hasSilkTouch())
+                                                                    .apply(
+                                                                            SetItemCountFunction.setCount(ConstantValue.exactly(1.0f))
+                                                                    )
+                                                                    .apply(
+                                                                            SetItemCountFunction.setCount(ConstantValue.exactly(2.0f))
+                                                                                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(slabBlock)
+                                                                                    .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SlabBlock.TYPE, SlabType.DOUBLE))
+                                                                                    )
+                                                                    )
+                                                    )
+                                            ) :
+                                    LootPool.lootPool()
+                                            .add(
+                                                    LootItem.lootTableItem(slabBlock)
+                                                            .when(this.hasSilkTouch())
+                                                            .apply(
+                                                                    SetItemCountFunction.setCount(ConstantValue.exactly(1.0f))
+                                                            )
+                                                            .apply(
+                                                                    SetItemCountFunction.setCount(ConstantValue.exactly(2.0f))
+                                                                            .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(slabBlock)
+                                                                                    .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SlabBlock.TYPE, SlabType.DOUBLE))
+                                                                            )
+                                                            )
+                                            )
+                                            .add(
+                                                    this.applyExplosionDecay(
+                                                            slabBlock,
+                                                            LootItem.lootTableItem(drop)
+                                                                    .when(this.doesNotHaveSilkTouch())
+                                                                    .apply(
+                                                                            SetItemCountFunction.setCount(UniformGenerator.between(minDrops, maxDrops))
+                                                                    )
+                                                                    .apply(
+                                                                            SetItemCountFunction.setCount(UniformGenerator.between(minDrops * 2, maxDrops * 2))
+                                                                                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(slabBlock)
+                                                                                            .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SlabBlock.TYPE, SlabType.DOUBLE))
+                                                                                    )
+                                                                    )
+                                                    )
+                                            )
+                    );
+        }
+
+        private LootTable.Builder createDrops(@NotNull LatticeBlock<?> latticeBlock, @Nullable Supplier<Item> dropItem, float minDrops, float maxDrops, boolean silkTouchRequired) {
+            Block block = latticeBlock.get();
+            Item drop = dropItem == null ? block.asItem() : dropItem.get();
+
+            return LootTable.lootTable()
+                    .withPool(
+                            silkTouchRequired ?
+                                    LootPool.lootPool()
+                                            .add(
+                                                    this.applyExplosionDecay(
+                                                            block,
+                                                            LootItem.lootTableItem(block)
+                                                                    .when(this.hasSilkTouch())
+                                                                    .apply(
+                                                                            SetItemCountFunction.setCount(ConstantValue.exactly(1.0f))
+                                                                    )
+                                                    )
+                                            ) :
+                                    LootPool.lootPool()
+                                            .add(
+                                                    LootItem.lootTableItem(block)
+                                                            .when(this.hasSilkTouch())
+                                                            .apply(
+                                                                    SetItemCountFunction.setCount(ConstantValue.exactly(1.0f))
+                                                            )
+                                            )
+                                            .add(
+                                                    this.applyExplosionDecay(
+                                                            block,
+                                                            LootItem.lootTableItem(drop)
+                                                                    .when(this.doesNotHaveSilkTouch())
+                                                                    .apply(
+                                                                            SetItemCountFunction.setCount(UniformGenerator.between(minDrops, maxDrops))
+                                                                    )
+                                                    )
+                                            )
+                    );
         }
 
         @Override
