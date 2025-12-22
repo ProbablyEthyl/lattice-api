@@ -2,6 +2,7 @@ package net.ethyl.lattice_api;
 
 import com.mojang.logging.LogUtils;
 import net.ethyl.lattice_api.core.data.LatticeRegistries;
+import net.ethyl.lattice_api.core.instances.Events;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.core.utils.ErrUtils;
 import net.neoforged.bus.api.IEventBus;
@@ -19,6 +20,7 @@ public class LatticeApi {
     public LatticeApi(IEventBus modEventBus, ModContainer modContainer) {
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         LatticeRegistries.register(modEventBus);
+        Events.addListener();
     }
 
     public static void invalidIdErr(@NotNull RegistryId registryId) {

@@ -5,6 +5,7 @@ import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.core.utils.RegistryUtils;
 import net.ethyl.lattice_api.modules.base.*;
 import net.ethyl.lattice_api.modules.common.items.equipment.tier.LatticeTier;
+import net.ethyl.lattice_api.modules.common.other.fx.LatticeFX;
 import net.ethyl.lattice_api.modules.common.tabs.LatticeCreativeTab;
 import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeToolType;
 import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeBlockModelType;
@@ -29,6 +30,7 @@ public class LatticeRegistries {
     private static final Collection<LatticeBlock<?>> blocks = new LinkedList<>();
     private static final Collection<LatticeCreativeTab> tabs = new LinkedList<>();
     private static final Collection<LatticeTier> tiers = new LinkedList<>();
+    private static final Collection<LatticeFX> fx = new LinkedList<>();
 
     public static Tags createTags(@NotNull String modId) {
         return new Tags(modId);
@@ -52,6 +54,10 @@ public class LatticeRegistries {
 
     public static Tiers createTiers(@NotNull String modId) {
         return new Tiers(modId);
+    }
+
+    public static FX createFX(@NotNull String modId) {
+        return new FX(modId);
     }
 
     public static class Tags extends LatticeRegistry<LatticeTag<?>> {
@@ -236,6 +242,27 @@ public class LatticeRegistries {
         }
     }
 
+    public static class FX extends LatticeRegistry<LatticeFX> {
+        protected FX(@NotNull String modId) {
+            super(modId);
+        }
+
+        public<I extends LatticeFX> I register(@NotNull String id, @NotNull LatticeFX.AppendableBuilder<I, ?> builder) {
+            RegistryId registryId = createRegistryId(this, id);
+            I latticeFX = builder.build(registryId);
+            this.registryContent.add(latticeFX);
+
+            return latticeFX;
+        }
+
+        @Override
+        public void register(@NotNull IEventBus modEventBus) {
+            this.registryContent.forEach(latticeFX -> checkDuplicate(fx, latticeFX.getRegistryId()));
+
+            fx.addAll(this.registryContent);
+        }
+    }
+
     public static Collection<LatticeTag<?>> getTags() {
         return new LinkedList<>(tags);
     }
@@ -258,6 +285,10 @@ public class LatticeRegistries {
 
     public static Collection<LatticeTier> getTiers() {
         return new LinkedList<>(tiers);
+    }
+
+    public static Collection<LatticeFX> getFX() {
+        return new LinkedList<>(fx);
     }
 
     public static <R extends LatticeRegistry<? extends LatticeObject>> RegistryId createRegistryId(@NotNull R registry, @NotNull String path) {
