@@ -20,6 +20,12 @@ public class LatticeItem<T extends Item> extends LatticeObject {
         this.modelType = builder.modelType;
     }
 
+    protected LatticeItem(@NotNull LatticeItem<T> latticeItem) {
+        super(latticeItem.getRegistryId());
+        this.deferredItem = latticeItem.getDeferred();
+        this.modelType = latticeItem.getModelType();
+    }
+
     public DeferredItem<T> getDeferred() {
         return this.deferredItem;
     }
@@ -30,6 +36,11 @@ public class LatticeItem<T extends Item> extends LatticeObject {
 
     public LatticeItemModelType getModelType() {
         return this.modelType;
+    }
+
+    @Override
+    public LatticeObject clone() {
+        return new LatticeItem<>(this);
     }
 
     public static class AppendableBuilder<T extends Item, I extends LatticeItem<T>, B extends AppendableBuilder<T, I, B>> {

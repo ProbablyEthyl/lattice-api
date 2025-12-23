@@ -3,7 +3,7 @@ package net.ethyl.lattice_api.modules.base;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import org.jetbrains.annotations.NotNull;
 
-public class LatticeObject {
+public abstract class LatticeObject {
     protected final RegistryId registryId;
 
     protected LatticeObject(@NotNull RegistryId registryId) {
@@ -21,4 +21,6 @@ public class LatticeObject {
     public RegistryId getRegistryId() {
         return this.registryId;
     }
+
+    public abstract LatticeObject clone();
 }

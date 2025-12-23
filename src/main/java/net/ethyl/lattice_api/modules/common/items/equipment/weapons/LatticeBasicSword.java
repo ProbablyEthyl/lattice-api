@@ -1,12 +1,10 @@
 package net.ethyl.lattice_api.modules.common.items.equipment.weapons;
 
-import net.ethyl.lattice_api.core.content.items.equipment.tools.BasicShovel;
 import net.ethyl.lattice_api.core.content.items.equipment.weapons.BasicSword;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.ethyl.lattice_api.modules.common.items.equipment.tools.LatticeBasicPickaxe;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.SwordItem;
 import net.neoforged.neoforge.registries.DeferredItem;
 import org.apache.commons.lang3.function.TriFunction;

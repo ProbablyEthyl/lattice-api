@@ -29,12 +29,22 @@ public class LatticeTier extends LatticeObject {
         this.tier = builder.generate();
     }
 
+    protected LatticeTier(@NotNull LatticeTier latticeTier) {
+        super(latticeTier.getRegistryId());
+        this.tier = latticeTier.get();
+    }
+
     public Tier get() {
         return this.tier;
     }
 
     public static Builder builder() {
         return new Builder(LatticeTier::new);
+    }
+
+    @Override
+    public LatticeObject clone() {
+        return new LatticeTier(this);
     }
 
     public static class Builder extends AppendableBuilder<LatticeTier, Builder> {

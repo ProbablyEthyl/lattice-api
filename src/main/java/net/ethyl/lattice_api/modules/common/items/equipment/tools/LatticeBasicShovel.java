@@ -1,7 +1,6 @@
 package net.ethyl.lattice_api.modules.common.items.equipment.tools;
 
 import net.ethyl.lattice_api.core.content.items.equipment.tools.BasicShovel;
-import net.ethyl.lattice_api.core.data.LatticeRegistries;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.minecraft.world.item.Item;

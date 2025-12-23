@@ -27,6 +27,13 @@ public class LatticeTag<T> extends LatticeObject {
         this.keyTagContent = builder.keyTagContent;
     }
 
+    private LatticeTag(@NotNull LatticeTag<T> latticeTag) {
+        super(latticeTag.getRegistryId());
+        this.tagKey = latticeTag.get();
+        this.tagContent = latticeTag.getTagContent();
+        this.keyTagContent = latticeTag.getKeyTagContent();
+    }
+
     public TagKey<T> get() {
         return this.tagKey;
     }
@@ -40,6 +47,11 @@ public class LatticeTag<T> extends LatticeObject {
 
     public boolean contains(@NotNull T instance) {
         return this.getTagContent().stream().anyMatch(element -> element.get().equals(instance));
+    }
+
+    @Override
+    public LatticeObject clone() {
+        return new LatticeTag<>(this);
     }
 
     public static abstract class AppendableBuilder<T, I extends LatticeTag<T>, B extends AppendableBuilder<T, I, B>> {

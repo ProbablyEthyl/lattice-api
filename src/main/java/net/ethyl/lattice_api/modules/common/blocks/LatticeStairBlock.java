@@ -3,6 +3,7 @@ package net.ethyl.lattice_api.modules.common.blocks;
 import net.ethyl.lattice_api.core.content.blocks.BasicStair;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeBlock;
+import net.ethyl.lattice_api.modules.base.LatticeObject;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.StairBlock;
@@ -16,13 +17,24 @@ import java.util.function.Supplier;
 public class LatticeStairBlock extends LatticeBlock<StairBlock> {
     protected final Supplier<Block> defaultBlock;
 
-    private LatticeStairBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<StairBlock> deferredBlock, @NotNull AppendableBuilder<StairBlock, ? extends LatticeBlock<StairBlock>, ?> builder) {
+    protected LatticeStairBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<StairBlock> deferredBlock, @NotNull AppendableBuilder<StairBlock, ? extends LatticeBlock<StairBlock>, ?> builder) {
         super(registryId, deferredBlock, builder);
         this.defaultBlock = builder.defaultBlock;
     }
 
+    private LatticeStairBlock(@NotNull LatticeStairBlock latticeStairBlock) {
+        super(latticeStairBlock);
+        this.defaultBlock = this.getDefaultBlock();
+    }
+
     public Supplier<Block> getDefaultBlock() {
         return this.defaultBlock;
+    }
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    public LatticeObject clone() {
+        return new LatticeStairBlock(this);
     }
 
     public static Builder builder() {

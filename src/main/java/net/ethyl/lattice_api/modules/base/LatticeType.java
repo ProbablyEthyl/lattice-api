@@ -10,6 +10,11 @@ public class LatticeType extends LatticeObject {
         super(registryId);
     }
 
+    @Override
+    public LatticeObject clone() {
+        return new LatticeType(this.getRegistryId());
+    }
+
     public static class AppendableBuilder<I extends LatticeType, B extends AppendableBuilder<I, B>> {
         private final Function<RegistryId, I> latticeFactory;
 

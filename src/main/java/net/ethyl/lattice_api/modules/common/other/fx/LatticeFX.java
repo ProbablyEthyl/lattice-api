@@ -45,11 +45,15 @@ public class LatticeFX extends LatticeObject {
         this.fxLayers = fxLayers;
     }
 
-    public LatticeFX generate(@NotNull ServerLevel serverLevel, @NotNull Player player) {
-        return new LatticeFX(this.registryId, this.fxProperties, this.fxLayers).prepare(serverLevel, player);
+    public LatticeFX cloneFX() {
+        return new LatticeFX(this.registryId, this.fxProperties, this.fxLayers);
     }
 
-    public LatticeFX prepare(@NotNull ServerLevel serverLevel, @NotNull Player player) {
+    public LatticeFX generate(@NotNull ServerLevel serverLevel, @NotNull Player player) {
+        return this.cloneFX().prepare(serverLevel, player);
+    }
+
+    private LatticeFX prepare(@NotNull ServerLevel serverLevel, @NotNull Player player) {
         this.serverLevel = serverLevel;
         this.player = player;
 
@@ -72,6 +76,11 @@ public class LatticeFX extends LatticeObject {
 
     public static Properties properties() {
         return new Properties();
+    }
+
+    @Override
+    public LatticeObject clone() {
+        return this.cloneFX();
     }
 
     public static Builder builder() {

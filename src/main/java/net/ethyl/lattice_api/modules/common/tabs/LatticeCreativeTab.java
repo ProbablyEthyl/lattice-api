@@ -29,8 +29,18 @@ public class LatticeCreativeTab extends LatticeObject {
         this.tabSupplier = tabSupplier;
     }
 
+    protected LatticeCreativeTab(@NotNull LatticeCreativeTab latticeCreativeTab) {
+        super(latticeCreativeTab.getRegistryId());
+        this.tabSupplier = latticeCreativeTab::get;
+    }
+
     public CreativeModeTab get() {
         return this.tabSupplier.get();
+    }
+
+    @Override
+    public LatticeObject clone() {
+        return new LatticeCreativeTab(this);
     }
 
     public static Builder builder() {

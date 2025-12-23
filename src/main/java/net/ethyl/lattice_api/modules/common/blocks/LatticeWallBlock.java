@@ -3,6 +3,7 @@ package net.ethyl.lattice_api.modules.common.blocks;
 import net.ethyl.lattice_api.core.content.blocks.BasicWall;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeBlock;
+import net.ethyl.lattice_api.modules.base.LatticeObject;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.WallBlock;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -20,8 +21,19 @@ public class LatticeWallBlock extends LatticeBlock<WallBlock> {
         this.defaultBlock = builder.defaultBlock;
     }
 
+    protected LatticeWallBlock(@NotNull LatticeWallBlock latticeWallBlock) {
+        super(latticeWallBlock);
+        this.defaultBlock = latticeWallBlock.getDefaultBlock();
+    }
+
     public Supplier<Block> getDefaultBlock() {
         return this.defaultBlock;
+    }
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    public LatticeObject clone() {
+        return new LatticeWallBlock(this);
     }
 
     public static Builder builder() {

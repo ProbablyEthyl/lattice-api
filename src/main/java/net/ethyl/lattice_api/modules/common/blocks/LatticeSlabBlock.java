@@ -3,6 +3,7 @@ package net.ethyl.lattice_api.modules.common.blocks;
 import net.ethyl.lattice_api.core.content.blocks.BasicSlab;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeBlock;
+import net.ethyl.lattice_api.modules.base.LatticeObject;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SlabBlock;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -15,13 +16,24 @@ import java.util.function.Supplier;
 public class LatticeSlabBlock extends LatticeBlock<SlabBlock> {
     protected final Supplier<Block> defaultBlock;
 
-    private LatticeSlabBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<SlabBlock> deferredBlock, @NotNull AppendableBuilder<SlabBlock, ? extends LatticeBlock<SlabBlock>, ?> builder) {
+    protected LatticeSlabBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<SlabBlock> deferredBlock, @NotNull AppendableBuilder<SlabBlock, ? extends LatticeBlock<SlabBlock>, ?> builder) {
         super(registryId, deferredBlock, builder);
         this.defaultBlock = builder.defaultBlock;
     }
 
+    protected LatticeSlabBlock(@NotNull LatticeSlabBlock latticeSlabBlock) {
+        super(latticeSlabBlock);
+        this.defaultBlock = latticeSlabBlock.getDefaultBlock();
+    }
+
     public Supplier<Block> getDefaultBlock() {
         return this.defaultBlock;
+    }
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    public LatticeObject clone() {
+        return new LatticeSlabBlock(this);
     }
 
     public static Builder builder() {

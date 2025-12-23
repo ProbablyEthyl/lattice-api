@@ -264,31 +264,31 @@ public class LatticeRegistries {
     }
 
     public static Collection<LatticeTag<?>> getTags() {
-        return new LinkedList<>(tags);
+        return cloneRegister(tags);
     }
 
     public static Collection<LatticeType> getModelTypes() {
-        return new LinkedList<>(modelTypes);
+        return cloneRegister(modelTypes);
     }
 
     public static Collection<LatticeItem<?>> getItems() {
-        return new LinkedList<>(items);
+        return cloneRegister(items);
     }
 
     public static Collection<LatticeBlock<?>> getBlocks() {
-        return new LinkedList<>(blocks);
+        return cloneRegister(blocks);
     }
 
     public static Collection<LatticeCreativeTab> getTabs() {
-        return new LinkedList<>(tabs);
+        return cloneRegister(tabs);
     }
 
     public static Collection<LatticeTier> getTiers() {
-        return new LinkedList<>(tiers);
+        return cloneRegister(tiers);
     }
 
     public static Collection<LatticeFX> getFX() {
-        return new LinkedList<>(fx);
+        return cloneRegister(fx);
     }
 
     public static <R extends LatticeRegistry<? extends LatticeObject>> RegistryId createRegistryId(@NotNull R registry, @NotNull String path) {
@@ -300,6 +300,10 @@ public class LatticeRegistries {
 
     public static void checkDuplicate(@NotNull Collection<? extends LatticeObject> collection, @NotNull RegistryId registryId) {
         RegistryUtils.checkDuplicate(collection, registryId);
+    }
+
+    public static <I extends LatticeObject> Collection<I> cloneRegister(@NotNull Collection<I> collection) {
+        return RegistryUtils.cloneRegister(collection);
     }
 
     public static void register(@NotNull IEventBus modEventBus) {

@@ -30,6 +30,14 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
         this.toolType = builder.toolType;
     }
 
+    protected LatticeBlock(@NotNull LatticeBlock<T> latticeBlock) {
+        super(latticeBlock.getRegistryId());
+        this.deferredBlock = latticeBlock.getDeferred();
+        this.modelType = latticeBlock.getModelType();
+        this.lootType = latticeBlock.getLootType();
+        this.toolType = latticeBlock.getToolType();
+    }
+
     public DeferredBlock<T> getDeferred() {
         return this.deferredBlock;
     }
@@ -52,6 +60,11 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
 
     public LatticeToolType getToolType() {
         return this.toolType;
+    }
+
+    @Override
+    public LatticeObject clone() {
+        return new LatticeBlock<>(this);
     }
 
     public static class AppendableBuilder<T extends Block, I extends LatticeBlock<T>, B extends AppendableBuilder<T, I, B>> {

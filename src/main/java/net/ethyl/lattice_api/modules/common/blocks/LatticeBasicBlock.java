@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Function;
 
 public class LatticeBasicBlock extends LatticeBlock<Block> {
-    private LatticeBasicBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<Block> deferredBlock, @NotNull AppendableBuilder<Block, ? extends LatticeBlock<Block>, ?> builder) {
+    protected LatticeBasicBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<Block> deferredBlock, @NotNull AppendableBuilder<Block, ? extends LatticeBlock<Block>, ?> builder) {
         super(registryId, deferredBlock, builder);
     }
 
