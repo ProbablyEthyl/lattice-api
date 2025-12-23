@@ -39,7 +39,7 @@ public class LatticeTier extends LatticeObject {
     }
 
     public static Builder builder() {
-        return new Builder(LatticeTier::new);
+        return new Builder();
     }
 
     @Override
@@ -48,8 +48,8 @@ public class LatticeTier extends LatticeObject {
     }
 
     public static class Builder extends AppendableBuilder<LatticeTier, Builder> {
-        protected Builder(@NotNull BiFunction<RegistryId, Builder, LatticeTier> latticeFactory) {
-            super(latticeFactory);
+        protected Builder() {
+            super(LatticeTier::new);
         }
     }
 

@@ -37,12 +37,12 @@ public class LatticeWallBlock extends LatticeBlock<WallBlock> {
     }
 
     public static Builder builder() {
-        return new Builder(LatticeWallBlock::new, BasicWall::new);
+        return new Builder();
     }
 
     public static class Builder extends AppendableBuilder<WallBlock, LatticeWallBlock, Builder> {
-        protected Builder(@NotNull TriFunction<RegistryId, DeferredBlock<WallBlock>, Builder, LatticeWallBlock> latticeFactory, @NotNull Function<Builder, WallBlock> blockFactory) {
-            super(latticeFactory, blockFactory);
+        private Builder() {
+            super(LatticeWallBlock::new, BasicWall::new);
         }
     }
 

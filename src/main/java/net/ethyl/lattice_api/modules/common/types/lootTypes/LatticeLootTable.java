@@ -7,7 +7,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class LatticeLootTable extends LatticeType {
@@ -63,12 +62,12 @@ public class LatticeLootTable extends LatticeType {
     }
 
     public static Builder builder() {
-        return new Builder(LatticeLootTable::new);
+        return new Builder();
     }
 
     public static class Builder extends AppendableBuilder<LatticeLootTable, Builder> {
-        private Builder(@NotNull Function<RegistryId, LatticeLootTable> latticeFactory) {
-            super(latticeFactory);
+        private Builder() {
+            super(LatticeLootTable::new);
         }
     }
 }

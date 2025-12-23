@@ -44,12 +44,12 @@ public class LatticeCreativeTab extends LatticeObject {
     }
 
     public static Builder builder() {
-        return new Builder(LatticeCreativeTab::new);
+        return new Builder();
     }
 
     public static class Builder extends AppendableBuilder<LatticeCreativeTab, Builder> {
-        protected Builder(@NotNull BiFunction<RegistryId, Supplier<CreativeModeTab>, LatticeCreativeTab> latticeFactory) {
-            super(latticeFactory);
+        protected Builder() {
+            super(LatticeCreativeTab::new);
         }
     }
 

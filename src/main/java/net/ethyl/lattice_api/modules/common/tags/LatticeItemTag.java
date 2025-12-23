@@ -19,12 +19,12 @@ public class LatticeItemTag extends LatticeTag<Item> {
     }
 
     public static Builder builder() {
-        return new Builder(LatticeItemTag::new, ItemTags::create);
+        return new Builder();
     }
 
     public static class Builder extends AppendableBuilder<LatticeItemTag, Builder> {
-        protected Builder(@NotNull TriFunction<RegistryId, TagKey<Item>, Builder, LatticeItemTag> latticeFactory, @NotNull Function<ResourceLocation, TagKey<Item>> tagKeyFactory) {
-            super(latticeFactory, tagKeyFactory);
+        protected Builder() {
+            super(LatticeItemTag::new, ItemTags::create);
         }
     }
 

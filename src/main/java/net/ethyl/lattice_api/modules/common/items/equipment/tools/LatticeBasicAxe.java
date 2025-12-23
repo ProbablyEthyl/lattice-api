@@ -17,12 +17,12 @@ public class LatticeBasicAxe extends LatticeItem<AxeItem> {
     }
 
     public static Builder builder() {
-        return new Builder(LatticeBasicAxe::new, BasicAxe::new);
+        return new Builder();
     }
 
     public static class Builder extends AppendableBuilder<AxeItem, LatticeBasicAxe, Builder> {
-        protected Builder(@NotNull TriFunction<RegistryId, DeferredItem<AxeItem>, Builder, LatticeBasicAxe> latticeFactory, @NotNull Function<Builder, AxeItem> itemFactory) {
-            super(latticeFactory, itemFactory);
+        protected Builder() {
+            super(LatticeBasicAxe::new, BasicAxe::new);
         }
     }
 

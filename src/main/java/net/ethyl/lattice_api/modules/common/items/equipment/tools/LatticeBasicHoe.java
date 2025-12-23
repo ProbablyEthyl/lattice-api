@@ -17,12 +17,12 @@ public class LatticeBasicHoe extends LatticeItem<HoeItem> {
     }
 
     public static Builder builder() {
-        return new Builder(LatticeBasicHoe::new, BasicHoe::new);
+        return new Builder();
     }
 
     public static class Builder extends AppendableBuilder<HoeItem, LatticeBasicHoe, Builder> {
-        protected Builder(@NotNull TriFunction<RegistryId, DeferredItem<HoeItem>, Builder, LatticeBasicHoe> latticeFactory, @NotNull Function<Builder, HoeItem> itemFactory) {
-            super(latticeFactory, itemFactory);
+        protected Builder() {
+            super(LatticeBasicHoe::new, BasicHoe::new);
         }
     }
 

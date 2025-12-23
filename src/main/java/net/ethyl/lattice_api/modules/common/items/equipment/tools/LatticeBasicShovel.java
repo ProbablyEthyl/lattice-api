@@ -17,12 +17,12 @@ public class LatticeBasicShovel extends LatticeItem<ShovelItem> {
     }
 
     public static Builder builder() {
-        return new Builder(LatticeBasicShovel::new, BasicShovel::new);
+        return new Builder();
     }
 
     public static class Builder extends AppendableBuilder<ShovelItem, LatticeBasicShovel, Builder> {
-        protected Builder(@NotNull TriFunction<RegistryId, DeferredItem<ShovelItem>, Builder, LatticeBasicShovel> latticeFactory, @NotNull Function<Builder, ShovelItem> itemFactory) {
-            super(latticeFactory, itemFactory);
+        protected Builder() {
+            super(LatticeBasicShovel::new, BasicShovel::new);
         }
     }
 

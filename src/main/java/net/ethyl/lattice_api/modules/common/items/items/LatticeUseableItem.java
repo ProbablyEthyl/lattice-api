@@ -22,12 +22,12 @@ public class LatticeUseableItem extends LatticeItem<Item> {
     }
 
     public static Builder builder() {
-        return new Builder(LatticeUseableItem::new, UseableItem::new);
+        return new Builder();
     }
 
     public static class Builder extends AppendableBuilder<Item, LatticeUseableItem, Builder> {
-        protected Builder(@NotNull TriFunction<RegistryId, DeferredItem<Item>, Builder, LatticeUseableItem> latticeFactory, @NotNull Function<Builder, Item> itemFactory) {
-            super(latticeFactory, itemFactory);
+        protected Builder() {
+            super(LatticeUseableItem::new, UseableItem::new);
         }
     }
 

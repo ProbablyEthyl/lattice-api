@@ -84,7 +84,7 @@ public class LatticeFX extends LatticeObject {
     }
 
     public static Builder builder() {
-        return new Builder(LatticeFX::new);
+        return new Builder();
     }
 
     public static class Properties {
@@ -178,8 +178,8 @@ public class LatticeFX extends LatticeObject {
     }
 
     public static class Builder extends AppendableBuilder<LatticeFX, Builder> {
-        protected Builder(@NotNull BiFunction<RegistryId, Builder, LatticeFX> latticeFactory) {
-            super(latticeFactory);
+        protected Builder() {
+            super(LatticeFX::new);
         }
     }
 

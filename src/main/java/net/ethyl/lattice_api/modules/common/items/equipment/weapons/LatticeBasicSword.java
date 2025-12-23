@@ -18,12 +18,12 @@ public class LatticeBasicSword extends LatticeItem<SwordItem> {
     }
 
     public static Builder builder() {
-        return new Builder(LatticeBasicSword::new, BasicSword::new);
+        return new Builder();
     }
 
     public static class Builder extends AppendableBuilder<SwordItem, LatticeBasicSword, Builder> {
-        protected Builder(@NotNull TriFunction<RegistryId, DeferredItem<SwordItem>, Builder, LatticeBasicSword> latticeFactory, @NotNull Function<Builder, SwordItem> itemFactory) {
-            super(latticeFactory, itemFactory);
+        protected Builder() {
+            super(LatticeBasicSword::new, BasicSword::new);
         }
     }
 

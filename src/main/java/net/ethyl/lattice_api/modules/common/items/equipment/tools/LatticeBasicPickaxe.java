@@ -22,12 +22,12 @@ public class LatticeBasicPickaxe extends LatticeItem<PickaxeItem> {
     }
 
     public static Builder builder() {
-        return new Builder(LatticeBasicPickaxe::new, BasicPickaxe::new);
+        return new Builder();
     }
 
     public static class Builder extends AppendableBuilder<PickaxeItem, LatticeBasicPickaxe, Builder> {
-        protected Builder(@NotNull TriFunction<RegistryId, DeferredItem<PickaxeItem>, Builder, LatticeBasicPickaxe> latticeFactory, @NotNull Function<Builder, PickaxeItem> itemFactory) {
-            super(latticeFactory, itemFactory);
+        protected Builder() {
+            super(LatticeBasicPickaxe::new, BasicPickaxe::new);
         }
     }
 

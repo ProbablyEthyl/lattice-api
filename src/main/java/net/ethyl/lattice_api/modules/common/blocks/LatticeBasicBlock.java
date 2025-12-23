@@ -16,12 +16,12 @@ public class LatticeBasicBlock extends LatticeBlock<Block> {
     }
 
     public static Builder builder() {
-        return new Builder(LatticeBasicBlock::new, BasicBlock::new);
+        return new Builder();
     }
 
     public static class Builder extends AppendableBuilder<Block, LatticeBasicBlock, Builder> {
-        protected Builder(@NotNull TriFunction<RegistryId, DeferredBlock<Block>, Builder, LatticeBasicBlock> latticeFactory, @NotNull Function<Builder, Block> blockFactory) {
-            super(latticeFactory, blockFactory);
+        private Builder() {
+            super(LatticeBasicBlock::new, BasicBlock::new);
         }
     }
 

@@ -38,12 +38,12 @@ public class LatticeStairBlock extends LatticeBlock<StairBlock> {
     }
 
     public static Builder builder() {
-        return new Builder(LatticeStairBlock::new, BasicStair::new);
+        return new Builder();
     }
 
     public static class Builder extends AppendableBuilder<StairBlock, LatticeStairBlock, Builder> {
-        protected Builder(@NotNull TriFunction<RegistryId, DeferredBlock<StairBlock>, Builder, LatticeStairBlock> latticeFactory, @NotNull Function<Builder, StairBlock> blockFactory) {
-            super(latticeFactory, blockFactory);
+        private Builder() {
+            super(LatticeStairBlock::new, BasicStair::new);
         }
     }
 

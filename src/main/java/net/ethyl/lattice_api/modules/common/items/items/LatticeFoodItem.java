@@ -19,12 +19,12 @@ public class LatticeFoodItem extends LatticeItem<Item> {
     }
 
     public static Builder builder() {
-        return new Builder(LatticeFoodItem::new, FoodItem::new);
+        return new Builder();
     }
 
     public static class Builder extends AppendableBuilder<Item, LatticeFoodItem, Builder> {
-        protected Builder(@NotNull TriFunction<RegistryId, DeferredItem<Item>, Builder, LatticeFoodItem> latticeFactory, @NotNull Function<Builder, Item> itemFactory) {
-            super(latticeFactory, itemFactory);
+        protected Builder() {
+            super(LatticeFoodItem::new, FoodItem::new);
         }
     }
 

@@ -37,12 +37,12 @@ public class LatticeSlabBlock extends LatticeBlock<SlabBlock> {
     }
 
     public static Builder builder() {
-        return new Builder(LatticeSlabBlock::new, BasicSlab::new);
+        return new Builder();
     }
 
     public static class Builder extends AppendableBuilder<SlabBlock, LatticeSlabBlock, Builder> {
-        protected Builder(@NotNull TriFunction<RegistryId, DeferredBlock<SlabBlock>, Builder, LatticeSlabBlock> latticeFactory, @NotNull Function<Builder, SlabBlock> blockFactory) {
-            super(latticeFactory, blockFactory);
+        private Builder() {
+            super(LatticeSlabBlock::new, BasicSlab::new);
         }
     }
 

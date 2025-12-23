@@ -16,12 +16,12 @@ public class LatticeBasicItem extends LatticeItem<Item> {
     }
 
     public static Builder builder() {
-        return new Builder(LatticeBasicItem::new, BasicItem::new);
+        return new Builder();
     }
 
     public static class Builder extends AppendableBuilder<Item, LatticeBasicItem, Builder> {
-        protected Builder(@NotNull TriFunction<RegistryId, DeferredItem<Item>, Builder, LatticeBasicItem> latticeFactory, @NotNull Function<Builder, Item> itemFactory) {
-            super(latticeFactory, itemFactory);
+        protected Builder() {
+            super(LatticeBasicItem::new, BasicItem::new);
         }
     }
 
