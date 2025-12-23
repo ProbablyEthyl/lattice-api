@@ -46,7 +46,7 @@ public class LatticeFX extends LatticeObject {
     }
 
     public LatticeFX cloneFX() {
-        return new LatticeFX(this.registryId, this.fxProperties, this.fxLayers);
+        return new LatticeFX(this.getRegistryId(), this.fxProperties, this.fxLayers);
     }
 
     public LatticeFX generate(@NotNull ServerLevel serverLevel, @NotNull Player player) {
