@@ -4,22 +4,22 @@ import net.ethyl.lattice_api.core.instances.RegistryId;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class LatticeObject {
-    protected final RegistryId registryId;
+    private final RegistryId registryId;
 
     protected LatticeObject(@NotNull RegistryId registryId) {
         this.registryId = registryId;
     }
 
+    public RegistryId getRegistryId() {
+        return this.registryId;
+    }
+
     public String getModId() {
-        return this.registryId.getNamespace();
+        return this.getRegistryId().getNamespace();
     }
 
     public String getId() {
-        return this.registryId.getPath();
-    }
-
-    public RegistryId getRegistryId() {
-        return this.registryId;
+        return this.getRegistryId().getPath();
     }
 
     public abstract LatticeObject clone();
