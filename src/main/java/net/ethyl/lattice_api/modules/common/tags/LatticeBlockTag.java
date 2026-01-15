@@ -18,14 +18,8 @@ public class LatticeBlockTag extends LatticeTag<Block> {
         super(registryId, tagKey, builder);
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static class Builder extends AppendableBuilder<LatticeBlockTag, Builder> {
-        protected Builder() {
-            super(LatticeBlockTag::new, BlockTags::create);
-        }
+    public static AppendableBuilder<? extends LatticeBlockTag, ?> builder() {
+        return new AppendableBuilder<>(LatticeBlockTag::new, BlockTags::create);
     }
 
     public static class AppendableBuilder<I extends LatticeTag<Block>, B extends AppendableBuilder<I, B>> extends LatticeTag.AppendableBuilder<Block, I, B> {

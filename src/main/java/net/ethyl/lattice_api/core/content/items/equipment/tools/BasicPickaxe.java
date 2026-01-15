@@ -14,7 +14,7 @@ import java.util.List;
 public class BasicPickaxe extends PickaxeItem {
     private final boolean hasDescription;
 
-    public BasicPickaxe(@NotNull LatticeBasicPickaxe.AppendableBuilder<PickaxeItem, ? extends LatticeItem<PickaxeItem>, ?> builder) {
+    public BasicPickaxe(@NotNull LatticeBasicPickaxe.AppendableBuilder<? extends LatticeItem<PickaxeItem>, ?> builder) {
         super(builder.getTier(), builder.getItemProperties());
         this.hasDescription = builder.getHasDescription();
     }

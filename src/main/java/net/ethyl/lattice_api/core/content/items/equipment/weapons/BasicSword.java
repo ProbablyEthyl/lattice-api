@@ -14,7 +14,7 @@ import java.util.List;
 public class BasicSword extends SwordItem {
     public final boolean hasDescription;
 
-    public BasicSword(@NotNull LatticeBasicSword.AppendableBuilder<SwordItem, ? extends LatticeItem<SwordItem>, ?> builder) {
+    public BasicSword(@NotNull LatticeBasicSword.AppendableBuilder<? extends LatticeItem<SwordItem>, ?> builder) {
         super(builder.getTier(), builder.getItemProperties());
         this.hasDescription = builder.getHasDescription();
     }

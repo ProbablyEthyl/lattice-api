@@ -9,8 +9,6 @@ import net.minecraft.world.item.CreativeModeTab;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.stream.Collectors;
 
 public class RegistryUtils {
     public static void checkDuplicate(@NotNull Collection<? extends LatticeObject> collection, @NotNull RegistryId registryId) {
@@ -25,10 +23,5 @@ public class RegistryUtils {
                 .icon(builder.getIcon())
                 .displayItems(((itemDisplayParameters, output) -> builder.getTabContent().forEach(itemLikeSupplier -> output.accept(itemLikeSupplier.get()))))
                 .build();
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <I extends LatticeObject> Collection<I> cloneRegister(Collection<I> collection) {
-        return collection.stream().map(element -> (I) element.clone()).collect(Collectors.toCollection(LinkedList::new));
     }
 }

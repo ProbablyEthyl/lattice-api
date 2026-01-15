@@ -15,7 +15,7 @@ import java.util.List;
 public class BasicStair extends StairBlock {
     private final boolean hasDescription;
 
-    public BasicStair(@NotNull LatticeStairBlock.AppendableBuilder<StairBlock, ? extends LatticeBlock<StairBlock>, ?> builder) {
+    public BasicStair(@NotNull LatticeStairBlock.AppendableBuilder<? extends LatticeBlock<StairBlock>, ?> builder) {
         super(builder.getDefaultBlock().get().defaultBlockState(), builder.getBlockProperties());
         this.hasDescription = builder.getHasDescription();
     }

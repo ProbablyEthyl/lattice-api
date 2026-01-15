@@ -14,7 +14,7 @@ import java.util.List;
 public class BasicHoe extends HoeItem {
     private final boolean hasDescription;
 
-    public BasicHoe(@NotNull LatticeBasicHoe.AppendableBuilder<HoeItem, ? extends LatticeItem<HoeItem>, ?> builder) {
+    public BasicHoe(@NotNull LatticeBasicHoe.AppendableBuilder<? extends LatticeItem<HoeItem>, ?> builder) {
         super(builder.getTier(), builder.getItemProperties());
         this.hasDescription = builder.getHasDescription();
     }

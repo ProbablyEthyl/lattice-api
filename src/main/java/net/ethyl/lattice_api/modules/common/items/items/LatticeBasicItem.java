@@ -11,22 +11,16 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Function;
 
 public class LatticeBasicItem extends LatticeItem<Item> {
-    protected LatticeBasicItem(@NotNull RegistryId registryId, @NotNull DeferredItem<Item> deferredItem, @NotNull AppendableBuilder<Item, ? extends LatticeItem<Item>, ?> builder) {
+    protected LatticeBasicItem(@NotNull RegistryId registryId, @NotNull DeferredItem<Item> deferredItem, @NotNull AppendableBuilder<? extends LatticeItem<Item>, ?> builder) {
         super(registryId, deferredItem, builder);
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static AppendableBuilder<? extends LatticeBasicItem, ?> builder() {
+        return new AppendableBuilder<>(LatticeBasicItem::new, BasicItem::new);
     }
 
-    public static class Builder extends AppendableBuilder<Item, LatticeBasicItem, Builder> {
-        protected Builder() {
-            super(LatticeBasicItem::new, BasicItem::new);
-        }
-    }
-
-    public static class AppendableBuilder<T extends Item, I extends LatticeItem<T>, B extends AppendableBuilder<T, I, B>> extends LatticeItem.AppendableBuilder<T, I, B> {
-        protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredItem<T>, B, I> latticeFactory, @NotNull Function<B, T> itemFactory) {
+    public static class AppendableBuilder<I extends LatticeBasicItem, B extends AppendableBuilder<I, B>> extends LatticeItem.AppendableBuilder<Item, I, B> {
+        protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredItem<Item>, B, I> latticeFactory, @NotNull Function<B, Item> itemFactory) {
             super(latticeFactory, itemFactory);
         }
     }

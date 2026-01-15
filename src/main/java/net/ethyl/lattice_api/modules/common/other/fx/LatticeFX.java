@@ -1,6 +1,7 @@
 package net.ethyl.lattice_api.modules.common.other.fx;
 
 import net.ethyl.lattice_api.core.instances.FXLayer;
+import net.ethyl.lattice_api.core.instances.LatticeBuilder;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.core.utils.FXUtils;
 import net.ethyl.lattice_api.modules.base.LatticeObject;
@@ -34,19 +35,18 @@ public class LatticeFX extends LatticeObject {
         this.fxLayers = builder.fxLayers;
     }
 
-    private LatticeFX(@NotNull RegistryId registryId, @NotNull Collection<Properties> fxProperties, @NotNull HashMap<Integer, Collection<FXLayer<?>>> fxLayers) {
-        super(registryId);
-        this.fxProperties = new LinkedList<>();
+    public Collection<Properties> getFXProperties() {
+        return this.fxProperties;
+    }
 
-        for (Properties fxProperty : fxProperties) {
-            this.fxProperties.add(fxProperty.generate());
-        }
-
-        this.fxLayers = fxLayers;
+    public HashMap<Integer, Collection<FXLayer<?>>> getFXLayers() {
+        return this.fxLayers;
     }
 
     public LatticeFX cloneFX() {
-        return new LatticeFX(this.getRegistryId(), this.fxProperties, this.fxLayers);
+        return builder()
+                .from(this)
+                .build(this.getRegistryId(), null);
     }
 
     public LatticeFX generate(@NotNull ServerLevel serverLevel, @NotNull Player player) {
@@ -78,13 +78,8 @@ public class LatticeFX extends LatticeObject {
         return new Properties();
     }
 
-    @Override
-    public LatticeObject clone() {
-        return this.cloneFX();
-    }
-
-    public static Builder builder() {
-        return new Builder();
+    public static AppendableBuilder<? extends LatticeFX, ?> builder() {
+        return new AppendableBuilder<>(LatticeFX::new);
     }
 
     public static class Properties {
@@ -177,25 +172,18 @@ public class LatticeFX extends LatticeObject {
         }
     }
 
-    public static class Builder extends AppendableBuilder<LatticeFX, Builder> {
-        protected Builder() {
-            super(LatticeFX::new);
-        }
-    }
-
-    public static class AppendableBuilder<I extends LatticeFX, B extends AppendableBuilder<I, B>> {
-        private final BiFunction<RegistryId, B, I> latticeFactory;
-        private final Collection<Properties> fxProperties = new LinkedList<>();
-        private final HashMap<Integer, Collection<FXLayer<?>>> fxLayers = new HashMap<>();
+    public static class AppendableBuilder<I extends LatticeFX, B extends AppendableBuilder<I, B>> extends LatticeBuilder.Advanced<I, B> {
+        private Collection<Properties> fxProperties = new LinkedList<>();
+        private HashMap<Integer, Collection<FXLayer<?>>> fxLayers = new HashMap<>();
         private int layer = 0;
 
-        @SuppressWarnings("unchecked")
-        protected B self() {
-            return (B) this;
+        protected AppendableBuilder(@NotNull BiFunction<RegistryId, B, I> latticeFactory) {
+            super(latticeFactory);
         }
 
-        protected AppendableBuilder(@NotNull BiFunction<RegistryId, B, I> latticeFactory) {
-            this.latticeFactory = latticeFactory;
+        public B from(LatticeFX latticeFX) {
+            return this.fx(latticeFX.getFXProperties())
+                    .particles(latticeFX.getFXLayers());
         }
 
         public B fx(@NotNull Properties fxProperties, int startingTick, int totalTicks) {
@@ -220,14 +208,22 @@ public class LatticeFX extends LatticeObject {
             return this.self();
         }
 
+        public B fx(@NotNull Collection<Properties> fxProperties) {
+            this.fxProperties = fxProperties;
+
+            return this.self();
+        }
+
         public B particles(@NotNull FXLayer<?>... fxLayers) {
             this.fxLayers.put(this.layer++, Arrays.asList(fxLayers));
 
             return this.self();
         }
 
-        public I build(@NotNull RegistryId registryId) {
-            return this.latticeFactory.apply(registryId, this.self());
+        public B particles(@NotNull HashMap<Integer, Collection<FXLayer<?>>> fxLayers) {
+            this.fxLayers = fxLayers;
+
+            return this.self();
         }
     }
 }

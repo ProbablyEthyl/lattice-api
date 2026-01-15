@@ -24,20 +24,25 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 public class LatticeRegistries {
-    private static final Collection<LatticeTag<?>> tags = new LinkedList<>();
     private static final Collection<LatticeType> modelTypes = new LinkedList<>();
+    private static final Collection<LatticeTag<?>> tags = new LinkedList<>();
+    private static final Collection<LatticeRecipe> recipes = new LinkedList<>();
     private static final Collection<LatticeItem<?>> items = new LinkedList<>();
     private static final Collection<LatticeBlock<?>> blocks = new LinkedList<>();
     private static final Collection<LatticeCreativeTab> tabs = new LinkedList<>();
     private static final Collection<LatticeTier> tiers = new LinkedList<>();
     private static final Collection<LatticeFX> fx = new LinkedList<>();
 
+    public static Types createTypes(@NotNull String modId) {
+        return new Types(modId);
+    }
+
     public static Tags createTags(@NotNull String modId) {
         return new Tags(modId);
     }
 
-    public static Types createTypes(@NotNull String modId) {
-        return new Types(modId);
+    public static Recipes createRecipes(@NotNull String modId) {
+        return new Recipes(modId);
     }
 
     public static Items createItems(@NotNull String modId) {
@@ -58,26 +63,6 @@ public class LatticeRegistries {
 
     public static FX createFX(@NotNull String modId) {
         return new FX(modId);
-    }
-
-    public static class Tags extends LatticeRegistry<LatticeTag<?>> {
-        private Tags(@NotNull String modId) {
-            super(modId);
-        }
-
-        public <T, I extends LatticeTag<T>> I register(@NotNull String id, @NotNull LatticeTag.AppendableBuilder<T, I, ?> builder) {
-            I latticeTag = builder.build(createRegistryId(this, id));
-            this.registryContent.add(latticeTag);
-
-            return latticeTag;
-        }
-
-        @Override
-        public void register(@NotNull IEventBus modEventBus) {
-            this.registryContent.forEach(latticeTag -> checkDuplicate(tags, latticeTag.getRegistryId()));
-
-            tags.addAll(this.registryContent);
-        }
     }
 
     public static class Types extends LatticeRegistry<LatticeType> {
@@ -127,7 +112,7 @@ public class LatticeRegistries {
         }
 
         public <I extends LatticeType> I register(@NotNull String id, @NotNull LatticeType.AppendableBuilder<I, ?> builder) {
-            I latticeType = builder.build(createRegistryId(this, id));
+            I latticeType = builder.build(createRegistryId(this, id), null);
             this.registryContent.add(latticeType);
 
             return latticeType;
@@ -138,6 +123,47 @@ public class LatticeRegistries {
             this.registryContent.forEach(latticeModelType -> checkDuplicate(modelTypes, latticeModelType.getRegistryId()));
 
             modelTypes.addAll(this.registryContent);
+        }
+    }
+
+    public static class Tags extends LatticeRegistry<LatticeTag<?>> {
+        private Tags(@NotNull String modId) {
+            super(modId);
+        }
+
+        public <T, I extends LatticeTag<T>> I register(@NotNull String id, @NotNull LatticeTag.AppendableBuilder<T, I, ?> builder) {
+            RegistryId registryId = createRegistryId(this, id);
+            I latticeTag = builder.build(registryId, builder.generate(registryId));
+            this.registryContent.add(latticeTag);
+
+            return latticeTag;
+        }
+
+        @Override
+        public void register(@NotNull IEventBus modEventBus) {
+            this.registryContent.forEach(latticeTag -> checkDuplicate(tags, latticeTag.getRegistryId()));
+
+            tags.addAll(this.registryContent);
+        }
+    }
+
+    public static class Recipes extends LatticeRegistry<LatticeRecipe> {
+        protected Recipes(@NotNull String modId) {
+            super(modId);
+        }
+
+        public <I extends LatticeRecipe> I register(@NotNull String id, @NotNull LatticeRecipe.AppendableBuilder<I, ?> builder) {
+            I latticeRecipe = builder.build(createRegistryId(this, id), null);
+            this.registryContent.add(latticeRecipe);
+
+            return latticeRecipe;
+        }
+
+        @Override
+        public void register(@NotNull IEventBus modEventBus) {
+            this.registryContent.forEach(latticeRecipe -> checkDuplicate(recipes, latticeRecipe.getRegistryId()));
+
+            recipes.addAll(this.registryContent);
         }
     }
 
@@ -228,7 +254,7 @@ public class LatticeRegistries {
 
         public <I extends LatticeTier> I register(@NotNull String id, @NotNull LatticeTier.AppendableBuilder<I, ?> builder) {
             RegistryId registryId = createRegistryId(this, id);
-            I latticeTier = builder.build(registryId);
+            I latticeTier = builder.build(registryId, null);
             this.registryContent.add(latticeTier);
 
             return latticeTier;
@@ -249,7 +275,7 @@ public class LatticeRegistries {
 
         public<I extends LatticeFX> I register(@NotNull String id, @NotNull LatticeFX.AppendableBuilder<I, ?> builder) {
             RegistryId registryId = createRegistryId(this, id);
-            I latticeFX = builder.build(registryId);
+            I latticeFX = builder.build(registryId, null);
             this.registryContent.add(latticeFX);
 
             return latticeFX;
@@ -263,32 +289,36 @@ public class LatticeRegistries {
         }
     }
 
-    public static Collection<LatticeTag<?>> getTags() {
-        return cloneRegister(tags);
+    public static Collection<LatticeType> getModelTypes() {
+        return new LinkedList<>(modelTypes);
     }
 
-    public static Collection<LatticeType> getModelTypes() {
-        return cloneRegister(modelTypes);
+    public static Collection<LatticeTag<?>> getTags() {
+        return new LinkedList<>(tags);
+    }
+
+    public static Collection<LatticeRecipe> getRecipes() {
+        return new LinkedList<>(recipes);
     }
 
     public static Collection<LatticeItem<?>> getItems() {
-        return cloneRegister(items);
+        return new LinkedList<>(items);
     }
 
     public static Collection<LatticeBlock<?>> getBlocks() {
-        return cloneRegister(blocks);
+        return new LinkedList<>(blocks);
     }
 
     public static Collection<LatticeCreativeTab> getTabs() {
-        return cloneRegister(tabs);
+        return new LinkedList<>(tabs);
     }
 
     public static Collection<LatticeTier> getTiers() {
-        return cloneRegister(tiers);
+        return new LinkedList<>(tiers);
     }
 
     public static Collection<LatticeFX> getFX() {
-        return cloneRegister(fx);
+        return new LinkedList<>(fx);
     }
 
     public static <R extends LatticeRegistry<? extends LatticeObject>> RegistryId createRegistryId(@NotNull R registry, @NotNull String path) {
@@ -300,10 +330,6 @@ public class LatticeRegistries {
 
     public static void checkDuplicate(@NotNull Collection<? extends LatticeObject> collection, @NotNull RegistryId registryId) {
         RegistryUtils.checkDuplicate(collection, registryId);
-    }
-
-    public static <I extends LatticeObject> Collection<I> cloneRegister(@NotNull Collection<I> collection) {
-        return RegistryUtils.cloneRegister(collection);
     }
 
     public static void register(@NotNull IEventBus modEventBus) {

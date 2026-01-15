@@ -15,7 +15,7 @@ import java.util.List;
 public class BasicWall extends WallBlock {
     private final boolean hasDescription;
 
-    public BasicWall(@NotNull LatticeWallBlock.AppendableBuilder<WallBlock, ? extends LatticeBlock<WallBlock>, ?> builder) {
+    public BasicWall(@NotNull LatticeWallBlock.AppendableBuilder<? extends LatticeBlock<WallBlock>, ?> builder) {
         super(builder.getBlockProperties());
         this.hasDescription = builder.getHasDescription();
     }

@@ -17,7 +17,7 @@ public class FuelItem extends Item {
     private final boolean hasDescription;
     private final int burnTicks;
 
-    public FuelItem(@NotNull LatticeFuelItem.AppendableBuilder<Item, ? extends LatticeItem<Item>, ?> builder) {
+    public FuelItem(@NotNull LatticeFuelItem.AppendableBuilder<? extends LatticeItem<Item>, ?> builder) {
         super(builder.getItemProperties());
         this.hasDescription = builder.getHasDescription();
         this.burnTicks = builder.getBurnTicks();

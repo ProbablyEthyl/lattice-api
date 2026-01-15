@@ -1,5 +1,6 @@
 package net.ethyl.lattice_api.modules.base;
 
+import net.ethyl.lattice_api.core.instances.LatticeBuilder;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.modules.common.tags.LatticeBlockTag;
 import net.ethyl.lattice_api.modules.common.tags.LatticeItemTag;
@@ -20,18 +21,11 @@ public class LatticeTag<T> extends LatticeObject {
     protected final Collection<Supplier<T>> tagContent;
     protected final Collection<Supplier<TagKey<T>>> keyTagContent;
 
-    protected LatticeTag(@NotNull RegistryId registryId, @NotNull TagKey<T> tagKey, @NotNull LatticeTag.AppendableBuilder<T, ? extends LatticeTag<T>, ?> builder) {
+    protected LatticeTag(@NotNull RegistryId registryId, @NotNull TagKey<T> tagKey, @NotNull AppendableBuilder<T, ? extends LatticeTag<T>, ?> builder) {
         super(registryId);
         this.tagKey = tagKey;
         this.tagContent = builder.tagContent;
         this.keyTagContent = builder.keyTagContent;
-    }
-
-    private LatticeTag(@NotNull LatticeTag<T> latticeTag) {
-        super(latticeTag.getRegistryId());
-        this.tagKey = latticeTag.get();
-        this.tagContent = latticeTag.getTagContent();
-        this.keyTagContent = latticeTag.getKeyTagContent();
     }
 
     public TagKey<T> get() {
@@ -41,6 +35,7 @@ public class LatticeTag<T> extends LatticeObject {
     public Collection<Supplier<T>> getTagContent() {
         return this.tagContent;
     }
+
     public Collection<Supplier<TagKey<T>>> getKeyTagContent() {
         return this.keyTagContent;
     }
@@ -49,25 +44,18 @@ public class LatticeTag<T> extends LatticeObject {
         return this.getTagContent().stream().anyMatch(element -> element.get().equals(instance));
     }
 
-    @Override
-    public LatticeObject clone() {
-        return new LatticeTag<>(this);
-    }
-
-    public static abstract class AppendableBuilder<T, I extends LatticeTag<T>, B extends AppendableBuilder<T, I, B>> {
-        protected final Collection<Supplier<T>> tagContent = new LinkedList<>();
-        protected final Collection<Supplier<TagKey<T>>> keyTagContent = new LinkedList<>();
-        private final TriFunction<RegistryId, TagKey<T>, B, I> latticeFactory;
+    public static abstract class AppendableBuilder<T, I extends LatticeTag<T>, B extends AppendableBuilder<T, I, B>> extends LatticeBuilder.Complex<I, TagKey<T>, B> {
         private final Function<ResourceLocation, TagKey<T>> tagKeyFactory;
-
-        @SuppressWarnings("unchecked")
-        protected B self() {
-            return (B) this;
-        }
+        protected Collection<Supplier<T>> tagContent = new LinkedList<>();
+        protected Collection<Supplier<TagKey<T>>> keyTagContent = new LinkedList<>();
 
         protected AppendableBuilder(@NotNull TriFunction<RegistryId, TagKey<T>, B, I> latticeFactory, @NotNull Function<ResourceLocation, TagKey<T>> tagKeyFactory) {
-            this.latticeFactory = latticeFactory;
+            super(latticeFactory);
             this.tagKeyFactory = tagKeyFactory;
+        }
+
+        public TagKey<T> generate(@NotNull RegistryId registryId) {
+            return this.tagKeyFactory.apply(registryId.toResourceLoc());
         }
 
         public B add(@NotNull TagKey<T> tagKey) {
@@ -78,10 +66,6 @@ public class LatticeTag<T> extends LatticeObject {
             this.keyTagContent.add(tagKeySupplier);
 
             return this.self();
-        }
-
-        public I build(@NotNull RegistryId registryId) {
-            return latticeFactory.apply(registryId, this.tagKeyFactory.apply(registryId.toResourceLoc()), this.self());
         }
     }
 }

@@ -13,7 +13,7 @@ public class LatticeBlockModelType extends LatticeType {
         return new Builder();
     }
 
-    public static class Builder extends AppendableBuilder<LatticeBlockModelType, Builder> {
+    public static class Builder extends LatticeType.AppendableBuilder<LatticeBlockModelType, Builder> {
         private Builder() {
             super(LatticeBlockModelType::new);
         }

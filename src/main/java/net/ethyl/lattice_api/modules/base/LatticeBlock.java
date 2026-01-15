@@ -1,6 +1,7 @@
 package net.ethyl.lattice_api.modules.base;
 
 import net.ethyl.lattice_api.core.data.LatticeRegistries;
+import net.ethyl.lattice_api.core.instances.LatticeBuilder;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeToolType;
 import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeBlockModelType;
@@ -8,6 +9,7 @@ import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeLootTable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import org.apache.commons.lang3.function.TriFunction;
@@ -21,21 +23,21 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
     protected final LatticeBlockModelType modelType;
     protected final LatticeLootTable lootType;
     protected final LatticeToolType toolType;
+    protected final boolean hasDescription;
+    protected final BlockBehaviour.Properties blockProperties;
+    protected final Item.Properties blockItemProperties;
+    protected final Supplier<Block> defaultBlock;
 
-    protected LatticeBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<T> deferredBlock, @NotNull LatticeBlock.AppendableBuilder<T, ? extends LatticeBlock<T>, ?> builder) {
+    protected LatticeBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<T> deferredBlock, @NotNull AppendableBuilder<T, ? extends LatticeBlock<T>, ?> builder) {
         super(registryId);
         this.deferredBlock = deferredBlock;
         this.modelType = builder.modelType;
         this.lootType = builder.lootType;
         this.toolType = builder.toolType;
-    }
-
-    protected LatticeBlock(@NotNull LatticeBlock<T> latticeBlock) {
-        super(latticeBlock.getRegistryId());
-        this.deferredBlock = latticeBlock.getDeferred();
-        this.modelType = latticeBlock.getModelType();
-        this.lootType = latticeBlock.getLootType();
-        this.toolType = latticeBlock.getToolType();
+        this.hasDescription = builder.hasDescription;
+        this.blockProperties = builder.blockProperties;
+        this.blockItemProperties = builder.blockItemProperties;
+        this.defaultBlock = builder.defaultBlock == null ? this.deferredBlock::get : builder.defaultBlock;
     }
 
     public DeferredBlock<T> getDeferred() {
@@ -62,28 +64,35 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
         return this.toolType;
     }
 
-    @Override
-    public LatticeObject clone() {
-        return new LatticeBlock<>(this);
+    public boolean hasDescription() {
+        return this.hasDescription;
     }
 
-    public static class AppendableBuilder<T extends Block, I extends LatticeBlock<T>, B extends AppendableBuilder<T, I, B>> {
-        private final TriFunction<RegistryId, DeferredBlock<T>, B, I> latticeFactory;
-        private final Function<B, T> blockFactory;
-        private LatticeBlockModelType modelType = LatticeRegistries.Types.Block.BASIC;
-        private LatticeLootTable lootType = LatticeRegistries.Types.LootTable.SELF;
-        private LatticeToolType toolType = LatticeRegistries.Types.ToolType.PICKAXE;
-        protected boolean hasDescription = false;
-        protected final BlockBehaviour.Properties blockProperties = BlockBehaviour.Properties.of().strength(1f);
-        protected final Item.Properties blockItemProperties = new Item.Properties().stacksTo(64);
+    public BlockBehaviour.Properties getBlockProperties() {
+        return this.blockProperties;
+    }
 
-        @SuppressWarnings("unchecked")
-        protected B self() {
-            return (B) this;
-        }
+    public Item.Properties getBlockItemProperties() {
+        return this.blockItemProperties;
+    }
+
+    public Supplier<Block> getDefaultBlock() {
+        return this.defaultBlock;
+    }
+
+    public static class AppendableBuilder<T extends Block, I extends LatticeBlock<T>, B extends AppendableBuilder<T, I, B>> extends LatticeBuilder.Complex<I, DeferredBlock<T>, B> {
+        private final Function<B, T> blockFactory;
+
+        protected LatticeBlockModelType modelType = LatticeRegistries.Types.Block.BASIC;
+        protected LatticeLootTable lootType = LatticeRegistries.Types.LootTable.SELF;
+        protected LatticeToolType toolType = LatticeRegistries.Types.ToolType.PICKAXE;
+        private boolean hasDescription = false;
+        protected BlockBehaviour.Properties blockProperties = BlockBehaviour.Properties.of().strength(1f);
+        protected Item.Properties blockItemProperties = new Item.Properties().stacksTo(64);
+        protected Supplier<Block> defaultBlock = () -> Blocks.STONE;
 
         protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredBlock<T>, B, I> latticeFactory, @NotNull Function<B, T> blockFactory) {
-            this.latticeFactory = latticeFactory;
+            super(latticeFactory);
             this.blockFactory = blockFactory;
         }
 
@@ -165,6 +174,12 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
             return this.blockProperties;
         }
 
+        public B blockProperties(@NotNull BlockBehaviour.Properties blockProperties) {
+            this.blockProperties = blockProperties;
+
+            return this.self();
+        }
+
         public B strength(float strength) {
             this.blockProperties.strength(strength);
 
@@ -205,6 +220,12 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
             return this.blockItemProperties;
         }
 
+        public B blockItemProperties(@NotNull Item.Properties blockItemProperties) {
+            this.blockItemProperties = blockItemProperties;
+
+            return this.self();
+        }
+
         public B stackSize(int stackSize) {
             this.blockItemProperties.stacksTo(stackSize);
 
@@ -217,8 +238,28 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
             return this.self();
         }
 
-        public I build(@NotNull RegistryId registryId, @NotNull DeferredBlock<T> deferredBlock) {
-            return this.latticeFactory.apply(registryId, deferredBlock, this.self());
+        public Supplier<Block> getDefaultBlock() {
+            return this.defaultBlock;
         }
+
+        public B defaultBlock(@NotNull LatticeBlock<?> latticeBlock) {
+            this.defaultBlock = latticeBlock::get;
+
+            return this.self();
+        }
+
+        public B defaultBlock(@NotNull Block block) {
+            this.defaultBlock = () -> block;
+
+            return this.self();
+        }
+
+//        protected I build(@NotNull LatticeBlock<T> latticeBlock) {
+//            return this.build(latticeBlock.getRegistryId(), latticeBlock.getDeferred());
+//        }
+
+//        public I build(@NotNull RegistryId registryId, @NotNull DeferredBlock<T> deferredBlock) {
+//            return this.latticeFactory.apply(registryId, deferredBlock, this.self());
+//        }
     }
 }

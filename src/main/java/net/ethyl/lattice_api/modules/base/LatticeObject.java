@@ -21,6 +21,4 @@ public abstract class LatticeObject {
     public String getId() {
         return this.getRegistryId().getPath();
     }
-
-    public abstract LatticeObject clone();
 }

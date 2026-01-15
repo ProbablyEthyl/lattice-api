@@ -24,7 +24,7 @@ public class UseableItem extends Item {
     private final TriConsumer<Level, Player, InteractionHand> use;
     private final Consumer<UseOnContext> useOn;
 
-    public UseableItem(@NotNull LatticeUseableItem.AppendableBuilder<Item, ? extends LatticeItem<Item>, ?> builder) {
+    public UseableItem(@NotNull LatticeUseableItem.AppendableBuilder<? extends LatticeItem<Item>, ?> builder) {
         super(builder.getItemProperties());
         this.hasDescription = builder.getHasDescription();
         this.use = builder.getUse();

@@ -14,7 +14,7 @@ import java.util.List;
 public class BasicShovel extends ShovelItem {
     private final boolean hasDescription;
 
-    public BasicShovel(@NotNull LatticeBasicShovel.AppendableBuilder<ShovelItem, ? extends LatticeItem<ShovelItem>, ?> builder) {
+    public BasicShovel(@NotNull LatticeBasicShovel.AppendableBuilder<? extends LatticeItem<ShovelItem>, ?> builder) {
         super(builder.getTier(), builder.getItemProperties());
         this.hasDescription = builder.getHasDescription();
     }

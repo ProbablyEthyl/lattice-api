@@ -14,7 +14,7 @@ import java.util.List;
 public class BasicItem extends Item {
     private final boolean hasDescription;
 
-    public BasicItem(@NotNull LatticeBasicItem.AppendableBuilder<Item, ? extends LatticeItem<Item>, ?> builder) {
+    public BasicItem(@NotNull LatticeBasicItem.AppendableBuilder<? extends LatticeItem<Item>, ?> builder) {
         super(builder.getItemProperties());
         this.hasDescription = builder.getHasDescription();
     }

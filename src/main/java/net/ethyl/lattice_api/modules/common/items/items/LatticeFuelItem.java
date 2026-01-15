@@ -11,24 +11,25 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Function;
 
 public class LatticeFuelItem extends LatticeItem<Item> {
-    protected LatticeFuelItem(@NotNull RegistryId registryId, @NotNull DeferredItem<Item> deferredItem, @NotNull AppendableBuilder<Item, ? extends LatticeItem<Item>, ?> builder) {
+    protected final int burnTicks;
+
+    protected LatticeFuelItem(@NotNull RegistryId registryId, @NotNull DeferredItem<Item> deferredItem, @NotNull AppendableBuilder<? extends LatticeItem<Item>, ?> builder) {
         super(registryId, deferredItem, builder);
+        this.burnTicks = builder.burnTicks;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public int getBurnTicks() {
+        return this.burnTicks;
     }
 
-    public static class Builder extends AppendableBuilder<Item, LatticeFuelItem, Builder> {
-        protected Builder() {
-            super(LatticeFuelItem::new, FuelItem::new);
-        }
+    public static AppendableBuilder<? extends LatticeFuelItem, ?> builder() {
+        return new AppendableBuilder<>(LatticeFuelItem::new, FuelItem::new);
     }
 
-    public static class AppendableBuilder<T extends Item, I extends LatticeItem<T>, B extends AppendableBuilder<T, I, B>> extends LatticeItem.AppendableBuilder<T, I, B> {
+    public static class AppendableBuilder<I extends LatticeFuelItem, B extends AppendableBuilder<I, B>> extends LatticeItem.AppendableBuilder<Item, I, B> {
         protected int burnTicks = 20;
 
-        protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredItem<T>, B, I> latticeFactory, @NotNull Function<B, T> itemFactory) {
+        protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredItem<Item>, B, I> latticeFactory, @NotNull Function<B, Item> itemFactory) {
             super(latticeFactory, itemFactory);
         }
 

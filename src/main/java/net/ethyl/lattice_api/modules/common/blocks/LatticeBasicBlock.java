@@ -11,23 +11,23 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Function;
 
 public class LatticeBasicBlock extends LatticeBlock<Block> {
-    protected LatticeBasicBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<Block> deferredBlock, @NotNull AppendableBuilder<Block, ? extends LatticeBlock<Block>, ?> builder) {
+    protected LatticeBasicBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<Block> deferredBlock, @NotNull AppendableBuilder<? extends LatticeBlock<Block>, ?> builder) {
         super(registryId, deferredBlock, builder);
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static AppendableBuilder<? extends LatticeBasicBlock, ?> builder() {
+        return new AppendableBuilder<>(LatticeBasicBlock::new, BasicBlock::new);
     }
 
-    public static class Builder extends AppendableBuilder<Block, LatticeBasicBlock, Builder> {
-        private Builder() {
-            super(LatticeBasicBlock::new, BasicBlock::new);
-        }
-    }
-
-    public static class AppendableBuilder<T extends Block, I extends LatticeBlock<T>, B extends AppendableBuilder<T, I, B>> extends LatticeBlock.AppendableBuilder<T, I, B> {
-        protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredBlock<T>, B, I> latticeFactory, @NotNull Function<B, T> blockFactory) {
+    public static class AppendableBuilder<I extends LatticeBlock<Block>, B extends AppendableBuilder<I, B>> extends LatticeBlock.AppendableBuilder<Block, I, B> {
+        protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredBlock<Block>, B, I> latticeFactory, @NotNull Function<B, Block> blockFactory) {
             super(latticeFactory, blockFactory);
+        }
+
+        public B defaultBlockSelf() {
+            this.defaultBlock = null;
+
+            return this.self();
         }
     }
 }

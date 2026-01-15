@@ -14,7 +14,7 @@ import java.util.List;
 public class BasicAxe extends AxeItem {
     private final boolean hasDescription;
 
-    public BasicAxe(@NotNull LatticeBasicAxe.AppendableBuilder<AxeItem, ? extends LatticeItem<AxeItem>, ?> builder) {
+    public BasicAxe(@NotNull LatticeBasicAxe.AppendableBuilder<? extends LatticeItem<AxeItem>, ?> builder) {
         super(builder.getTier(), builder.getItemProperties());
         this.hasDescription = builder.getHasDescription();
     }

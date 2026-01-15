@@ -15,7 +15,7 @@ import java.util.List;
 public class BasicBlock extends Block {
     private final boolean hasDescription;
 
-    public BasicBlock(@NotNull LatticeBasicBlock.AppendableBuilder<Block, ? extends LatticeBlock<Block>, ?> builder) {
+    public BasicBlock(@NotNull LatticeBasicBlock.AppendableBuilder<? extends LatticeBlock<Block>, ?> builder) {
         super(builder.getBlockProperties());
         this.hasDescription = builder.getHasDescription();
     }

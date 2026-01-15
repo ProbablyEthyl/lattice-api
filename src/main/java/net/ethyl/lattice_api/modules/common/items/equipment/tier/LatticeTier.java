@@ -1,6 +1,7 @@
 package net.ethyl.lattice_api.modules.common.items.equipment.tier;
 
 import net.ethyl.lattice_api.LatticeApi;
+import net.ethyl.lattice_api.core.instances.LatticeBuilder;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeBlock;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
@@ -20,6 +21,12 @@ import java.util.function.Supplier;
 
 public class LatticeTier extends LatticeObject {
     protected final Tier tier;
+    protected final Supplier<TagKey<Block>> tagKey;
+    protected final int uses;
+    protected final float speed;
+    protected final float attackDamageBonus;
+    protected final int enchantmentValue;
+    protected final Supplier<Ingredient> repairIngredient;
 
     protected LatticeTier(@NotNull RegistryId registryId, @NotNull AppendableBuilder<? extends LatticeTier, ?> builder) {
         super(registryId);
@@ -27,34 +34,47 @@ public class LatticeTier extends LatticeObject {
         if (builder.tagKey == null) LatticeApi.incompleteObjectErr(registryId);
 
         this.tier = builder.generate();
-    }
-
-    protected LatticeTier(@NotNull LatticeTier latticeTier) {
-        super(latticeTier.getRegistryId());
-        this.tier = latticeTier.get();
+        this.tagKey = builder.tagKey;
+        this.uses = builder.uses;
+        this.speed = builder.speed;
+        this.attackDamageBonus = builder.attackDamageBonus;
+        this.enchantmentValue = builder.enchantmentValue;
+        this.repairIngredient = builder.repairIngredient;
     }
 
     public Tier get() {
         return this.tier;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public TagKey<Block> getTagKey() {
+        return this.tagKey.get();
     }
 
-    @Override
-    public LatticeObject clone() {
-        return new LatticeTier(this);
+    public int getUses() {
+        return this.uses;
     }
 
-    public static class Builder extends AppendableBuilder<LatticeTier, Builder> {
-        protected Builder() {
-            super(LatticeTier::new);
-        }
+    public float getSpeed() {
+        return this.speed;
     }
 
-    public static class AppendableBuilder<I extends LatticeTier, B extends AppendableBuilder<I, B>> {
-        private final BiFunction<RegistryId, B, I> latticeFactory;
+    public float getAttackDamageBonus() {
+        return this.attackDamageBonus;
+    }
+
+    public int getEnchantmentValue() {
+        return this.enchantmentValue;
+    }
+
+    public Supplier<Ingredient> getRepairIngredient() {
+        return this.repairIngredient;
+    }
+
+    public static AppendableBuilder<LatticeTier, ?> builder() {
+        return new AppendableBuilder<>(LatticeTier::new);
+    }
+
+    public static class AppendableBuilder<I extends LatticeTier, B extends AppendableBuilder<I, B>> extends LatticeBuilder.Advanced<I, B> {
         private Supplier<TagKey<Block>> tagKey = null;
         private int uses = 100;
         private float speed = 1f;
@@ -62,13 +82,8 @@ public class LatticeTier extends LatticeObject {
         private int enchantmentValue = 30;
         private Supplier<Ingredient> repairIngredient = () -> Ingredient.of(Items.COBWEB);
 
-        @SuppressWarnings("unchecked")
-        protected B self() {
-            return (B) this;
-        }
-
         protected AppendableBuilder(@NotNull BiFunction<RegistryId, B, I> latticeFactory) {
-            this.latticeFactory = latticeFactory;
+            super(latticeFactory);
         }
 
         public Tier generate() {
@@ -129,8 +144,10 @@ public class LatticeTier extends LatticeObject {
             return this.self();
         }
 
-        public I build(@NotNull RegistryId registryId) {
-            return this.latticeFactory.apply(registryId, this.self());
+        public B repairItem(@NotNull Ingredient ingredient) {
+            this.repairIngredient = () -> ingredient;
+
+            return this.self();
         }
     }
 }

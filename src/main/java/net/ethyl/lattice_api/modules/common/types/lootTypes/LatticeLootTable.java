@@ -1,7 +1,6 @@
 package net.ethyl.lattice_api.modules.common.types.lootTypes;
 
 import net.ethyl.lattice_api.core.instances.RegistryId;
-import net.ethyl.lattice_api.modules.base.LatticeObject;
 import net.ethyl.lattice_api.modules.base.LatticeType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -16,13 +15,6 @@ public class LatticeLootTable extends LatticeType {
 
     protected LatticeLootTable(@NotNull RegistryId registryId) {
         super(registryId);
-    }
-
-    protected LatticeLootTable(@NotNull LatticeLootTable latticeLootTable) {
-        super(latticeLootTable.getRegistryId());
-        this.drop = latticeLootTable.getDrop();
-        this.minDrops = latticeLootTable.getMinDrops();
-        this.maxDrops = latticeLootTable.getMaxDrops();
     }
 
     public Supplier<Item> getDrop() {
@@ -55,17 +47,11 @@ public class LatticeLootTable extends LatticeType {
         return this;
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-    @Override
-    public LatticeObject clone() {
-        return new LatticeLootTable(this);
-    }
-
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder extends AppendableBuilder<LatticeLootTable, Builder> {
+    public static class Builder extends LatticeType.AppendableBuilder<LatticeLootTable, Builder> {
         private Builder() {
             super(LatticeLootTable::new);
         }

@@ -4,7 +4,7 @@ import net.ethyl.lattice_api.core.content.items.equipment.tools.BasicAxe;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Tier;
 import net.neoforged.neoforge.registries.DeferredItem;
 import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
@@ -12,22 +12,23 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Function;
 
 public class LatticeBasicAxe extends LatticeItem<AxeItem> {
-    protected LatticeBasicAxe(@NotNull RegistryId registryId, @NotNull DeferredItem<AxeItem> deferredItem, @NotNull AppendableBuilder<AxeItem, ? extends LatticeItem<AxeItem>, ?> builder) {
+    private final Tier tier;
+
+    protected LatticeBasicAxe(@NotNull RegistryId registryId, @NotNull DeferredItem<AxeItem> deferredItem, @NotNull AppendableBuilder<? extends LatticeItem<AxeItem>, ?> builder) {
         super(registryId, deferredItem, builder);
+        this.tier = builder.getTier();
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public Tier getTier() {
+        return this.tier;
     }
 
-    public static class Builder extends AppendableBuilder<AxeItem, LatticeBasicAxe, Builder> {
-        protected Builder() {
-            super(LatticeBasicAxe::new, BasicAxe::new);
-        }
+    public static AppendableBuilder<? extends LatticeBasicAxe, ?> builder() {
+        return new AppendableBuilder<>(LatticeBasicAxe::new, BasicAxe::new);
     }
 
-    public static class AppendableBuilder<T extends Item, I extends LatticeItem<T>, B extends AppendableBuilder<T, I, B>> extends LatticeBasicPickaxe.AppendableBuilder<T, I, B> {
-        protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredItem<T>, B, I> latticeFactory, @NotNull Function<B, T> itemFactory) {
+    public static class AppendableBuilder<I extends LatticeItem<AxeItem>, B extends AppendableBuilder<I, B>> extends LatticeItem.AppendableBuilder.Tool<AxeItem, I, B> {
+        protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredItem<AxeItem>, B, I> latticeFactory, @NotNull Function<B, AxeItem> itemFactory) {
             super(latticeFactory, itemFactory);
         }
     }

@@ -1,9 +1,7 @@
 package net.ethyl.lattice_api.core.data;
 
-import net.ethyl.lattice_api.modules.base.LatticeBlock;
-import net.ethyl.lattice_api.modules.base.LatticeItem;
-import net.ethyl.lattice_api.modules.base.LatticeObject;
-import net.ethyl.lattice_api.modules.base.LatticeTag;
+import net.ethyl.lattice_api.modules.base.*;
+import net.ethyl.lattice_api.modules.common.RecipeTypes.LatticeShapedRecipe;
 import net.ethyl.lattice_api.modules.common.blocks.LatticeBasicBlock;
 import net.ethyl.lattice_api.modules.common.blocks.LatticeWallBlock;
 import net.ethyl.lattice_api.modules.common.blocks.LatticeSlabBlock;
@@ -26,16 +24,17 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.data.loot.LootTableProvider;
+import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.world.level.block.StairBlock;
-import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -46,9 +45,11 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePrope
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
+import net.neoforged.neoforge.common.conditions.IConditionBuilder;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
@@ -74,7 +75,7 @@ public class LatticeDataGen {
 
         dataGenerator.addProvider(event.includeServer(), new LootTableProvider(packOutput, Collections.emptySet(),
                 List.of(new LootTableProvider.SubProviderEntry(ignored -> new BlockLootTableProvider(lookupProvider.join(), modId), LootContextParamSets.BLOCK)), lookupProvider));
-
+        dataGenerator.addProvider(event.includeServer(), new RecipeGenerator(packOutput, lookupProvider, modId));
 
         dataGenerator.addProvider(event.includeClient(), new ItemModelGenerator(packOutput, modId, existingFileHelper));
         dataGenerator.addProvider(event.includeClient(), new BlockModelGenerator(packOutput, modId, existingFileHelper));
@@ -105,8 +106,6 @@ public class LatticeDataGen {
             IntrinsicTagAppender<Block> hoeTagAppender = this.tag(BlockTags.MINEABLE_WITH_HOE);
 
             for (LatticeBlock<?> latticeBlock : LatticeRegistries.getBlocks()) {
-                if (isNotFromMod(latticeBlock, this.modId)) continue;
-
                 LatticeToolType toolType = latticeBlock.getToolType();
                 Block block = latticeBlock.get();
 
@@ -152,8 +151,6 @@ public class LatticeDataGen {
             IntrinsicTagAppender<Item> hoeTagAppender = this.tag(ItemTags.HOES);
 
             for (LatticeItem<?> latticeItem : LatticeRegistries.getItems()) {
-                if (isNotFromMod(latticeItem, this.modId)) continue;
-
                 Item item = latticeItem.get();
 
                 switch (latticeItem) {
@@ -166,174 +163,6 @@ public class LatticeDataGen {
                     }
                 }
             }
-        }
-    }
-
-    public static class ItemModelGenerator extends ItemModelProvider {
-        private final String modId;
-
-        public ItemModelGenerator(PackOutput output, String modId, ExistingFileHelper existingFileHelper) {
-            super(output, modId, existingFileHelper);
-            this.modId = modId;
-        }
-
-        @Override
-        protected void registerModels() {
-            for (LatticeItem<?> latticeItem : LatticeRegistries.getItems()) {
-                if (isNotFromMod(latticeItem, this.modId)) continue;
-
-                Item item = latticeItem.get();
-                LatticeItemModelType modelType = latticeItem.getModelType();
-
-                if (modelType == LatticeRegistries.Types.Item.BASIC) this.basicItem(item);
-                else if (modelType == LatticeRegistries.Types.Item.HANDHELD) this.handheldItem(item);
-            }
-
-            for (LatticeBlock<?> latticeBlock : LatticeRegistries.getBlocks()) {
-                if (isNotFromMod(latticeBlock, this.modId)) continue;
-
-                if (latticeBlock instanceof LatticeWallBlock latticeWallBlock) {
-                    this.wallItem(latticeWallBlock);
-                }
-            }
-        }
-
-        private String getPath(@NotNull LatticeBlock<?> latticeBlock) {
-            return this.getPath(latticeBlock.get());
-        }
-
-        private String getPath(@NotNull Block block) {
-            return BuiltInRegistries.BLOCK.getKey(block).getPath();
-        }
-
-        private String getModId(@NotNull LatticeBlock<?> latticeBlock) {
-            return this.getModId(latticeBlock.get());
-        }
-
-        private String getModId(@NotNull Block block) {
-            return BuiltInRegistries.BLOCK.getKey(block).getNamespace();
-        }
-
-        protected void wallItem(@NotNull LatticeWallBlock latticeWallBlock) {
-            Block baseBlock = latticeWallBlock.getDefaultBlock().get();
-
-            this.withExistingParent(this.getPath(latticeWallBlock), this.mcLoc("block/wall_inventory"))
-                    .texture("wall", ResourceLocation.fromNamespaceAndPath(this.getModId(baseBlock), "block/" + this.getPath(baseBlock)));
-        }
-    }
-
-    public static class BlockModelGenerator extends BlockStateProvider {
-        private final String modId;
-
-        public BlockModelGenerator(PackOutput packOutput, String modId, ExistingFileHelper existingFileHelper) {
-            super(packOutput, modId, existingFileHelper);
-            this.modId = modId;
-        }
-
-        @Override
-        protected void registerStatesAndModels() {
-            for (LatticeBlock<?> latticeBlock : LatticeRegistries.getBlocks()) {
-                if (isNotFromMod(latticeBlock, this.modId)) continue;
-
-                LatticeBlockModelType modelType = latticeBlock.getModelType();
-
-                if (latticeBlock instanceof LatticeBasicBlock latticeBasicBlock) {
-                    Block block = latticeBasicBlock.get();
-                    String path = this.getPath(latticeBlock);
-
-                    if (modelType == LatticeRegistries.Types.Block.BASIC) {
-                        this.simpleBlockWithItem(block, this.cubeAll(block));
-                    } else if (modelType == LatticeRegistries.Types.Block.WITH_SIDES) {
-                        this.simpleBlockWithItem(block, this.models().cubeColumn(path, getSide(latticeBlock), getBase(latticeBlock)));
-                    }
-                } else {
-                    switch (latticeBlock) {
-                        case LatticeStairBlock latticeStairBlock -> {
-                            StairBlock stairBlock = latticeStairBlock.get();
-                            Block defaultBlock = latticeStairBlock.getDefaultBlock().get();
-
-                            if (modelType == LatticeRegistries.Types.Block.BASIC) {
-                                this.stairsBlock(stairBlock, this.blockTexture(latticeStairBlock.getDefaultBlock().get()));
-                            } else if (modelType == LatticeRegistries.Types.Block.WITH_SIDES) {
-                                this.stairsBlockWithRenderType(stairBlock, this.getSide(defaultBlock), this.getBase(defaultBlock), this.getBase(defaultBlock), "cutout");
-                            }
-                        }
-                        case LatticeSlabBlock latticeSlabBlock -> {
-                            SlabBlock slabBlock = latticeSlabBlock.get();
-                            Block defaultBlock = latticeSlabBlock.getDefaultBlock().get();
-
-                            if (modelType == LatticeRegistries.Types.Block.BASIC) {
-                                this.slabBlock(slabBlock, this.getBase(defaultBlock), this.getBase(defaultBlock));
-                            } else if (modelType == LatticeRegistries.Types.Block.WITH_SIDES) {
-                                this.slabBlock(slabBlock, this.getBase(defaultBlock), this.getSlab(defaultBlock), this.getBase(defaultBlock), this.getBase(defaultBlock));
-                            }
-                        }
-                        case LatticeWallBlock latticeWallBlock -> {
-                            WallBlock wallBlock = latticeWallBlock.get();
-                            Block defaultBlock = latticeWallBlock.getDefaultBlock().get();
-                            this.wallBlock(wallBlock, this.blockTexture(defaultBlock));
-
-                            continue;
-                        }
-                        default -> {
-                        }
-                    }
-
-                    this.createBlockItem(latticeBlock);
-                }
-            }
-        }
-
-        private String getPath(@NotNull LatticeBlock<?> latticeBlock) {
-            return this.getPath(latticeBlock.get());
-        }
-
-        private String getPath(@NotNull Block block) {
-            return BuiltInRegistries.BLOCK.getKey(block).getPath();
-        }
-
-        private ResourceLocation getTexture(@NotNull Block block, @Nullable String extension) {
-            return this.modLoc("block/" + this.getPath(block) + ((extension == null) ? "" : "_" + extension));
-        }
-
-        private ResourceLocation getBase(@NotNull LatticeBlock<?> latticeBlock) {
-            return this.getBase(latticeBlock.get());
-        }
-
-        private ResourceLocation getBase(@NotNull Block block) {
-            return this.getTexture(block, null);
-        }
-
-        private ResourceLocation getSide(@NotNull LatticeBlock<?> latticeBlock) {
-            return this.getSide(latticeBlock.get());
-        }
-
-        private ResourceLocation getSide(@NotNull Block block) {
-            return this.getTexture(block, "side");
-        }
-
-        private ResourceLocation getTop(@NotNull LatticeBlock<?> latticeBlock) {
-            return this.getTop(latticeBlock.get());
-        }
-
-        private ResourceLocation getTop(@NotNull Block block) {
-            return this.getTexture(block, "top");
-        }
-
-        private ResourceLocation getBottom(@NotNull LatticeBlock<?> latticeBlock) {
-            return this.getBottom(latticeBlock.get());
-        }
-
-        private ResourceLocation getBottom(@NotNull Block block) {
-            return this.getTexture(block, "bottom");
-        }
-
-        private ResourceLocation getSlab(@NotNull Block block) {
-            return this.getTexture(block, "slab");
-        }
-
-        private void createBlockItem(@NotNull LatticeBlock<?> latticeBlock) {
-            this.simpleBlockItem(latticeBlock.get(), new ModelFile.UncheckedModelFile(latticeBlock.getModId() + ":block/" + this.getPath(latticeBlock)));
         }
     }
 
@@ -398,7 +227,7 @@ public class LatticeDataGen {
                                                                     .apply(
                                                                             SetItemCountFunction.setCount(ConstantValue.exactly(2.0f))
                                                                                     .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(slabBlock)
-                                                                                    .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SlabBlock.TYPE, SlabType.DOUBLE))
+                                                                                            .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(SlabBlock.TYPE, SlabType.DOUBLE))
                                                                                     )
                                                                     )
                                                     )
@@ -481,11 +310,236 @@ public class LatticeDataGen {
         }
     }
 
+    public static class RecipeGenerator extends RecipeProvider implements IConditionBuilder {
+        private final String modId;
+
+        public RecipeGenerator(PackOutput output, CompletableFuture<HolderLookup.Provider> registries, String modId) {
+            super(output, registries);
+            this.modId = modId;
+        }
+
+        @Override
+        protected void buildRecipes(@NotNull RecipeOutput recipeOutput) {
+            for (LatticeRecipe latticeRecipe : LatticeRegistries.getRecipes()) {
+                if (isNotFromMod(latticeRecipe, this.modId)) continue;
+
+                ResourceLocation recipeId = latticeRecipe.getRegistryId().toResourceLoc();
+                RecipeCategory recipeCategory = latticeRecipe.getCategory();
+                Supplier<Item> result = latticeRecipe.getResult();
+                int resultCount = latticeRecipe.getResultCount();
+                String groupId = latticeRecipe.getGroup();
+
+                switch (latticeRecipe) {
+                    case LatticeShapedRecipe latticeShapedRecipe -> {
+                        ShapedRecipeBuilder builder = ShapedRecipeBuilder.shaped(recipeCategory, result.get(), resultCount);
+
+                        latticeShapedRecipe.getPattern().values().forEach(builder::pattern);
+
+                        latticeShapedRecipe.getDefined().forEach((key, value) -> builder.define(key, value.get()));
+
+                        builder.unlockedBy(latticeShapedRecipe.getUnlockId(), has(latticeShapedRecipe.getUnlockItem().get()));
+                        builder.group(groupId);
+                        builder.save(recipeOutput, recipeId);
+                    }
+
+                    default -> {
+                    }
+                }
+            }
+        }
+    }
+
+    public static class ItemModelGenerator extends ItemModelProvider {
+        private final String modId;
+
+        public ItemModelGenerator(PackOutput output, String modId, ExistingFileHelper existingFileHelper) {
+            super(output, modId, existingFileHelper);
+            this.modId = modId;
+        }
+
+        @Override
+        protected void registerModels() {
+            for (LatticeItem<?> latticeItem : LatticeRegistries.getItems()) {
+                if (isNotFromMod(latticeItem, this.modId)) continue;
+
+                Item item = latticeItem.get();
+                LatticeItemModelType modelType = latticeItem.getModelType();
+
+                if (modelType == LatticeRegistries.Types.Item.BASIC) this.basicItem(item);
+                else if (modelType == LatticeRegistries.Types.Item.HANDHELD) this.handheldItem(item);
+            }
+
+            for (LatticeBlock<?> latticeBlock : LatticeRegistries.getBlocks()) {
+                if (isNotFromMod(latticeBlock, this.modId)) continue;
+
+                if (latticeBlock instanceof LatticeWallBlock latticeWallBlock) {
+                    this.wallItem(latticeWallBlock);
+                }
+            }
+        }
+
+        private String getPath(@NotNull LatticeBlock<?> latticeBlock) {
+            return this.getPath(latticeBlock.get());
+        }
+
+        private String getPath(@NotNull Block block) {
+            return BuiltInRegistries.BLOCK.getKey(block).getPath();
+        }
+
+        private String getModId(@NotNull LatticeBlock<?> latticeBlock) {
+            return this.getModId(latticeBlock.get());
+        }
+
+        private String getModId(@NotNull Block block) {
+            return BuiltInRegistries.BLOCK.getKey(block).getNamespace();
+        }
+
+        protected void wallItem(@NotNull LatticeWallBlock latticeWallBlock) {
+            Block baseBlock = latticeWallBlock.getDefaultBlock().get();
+
+            this.withExistingParent(this.getPath(latticeWallBlock), this.mcLoc("block/wall_inventory"))
+                    .texture("wall", ResourceLocation.fromNamespaceAndPath(this.getModId(baseBlock), "block/" + this.getPath(baseBlock)));
+        }
+    }
+
+    public static class BlockModelGenerator extends BlockStateProvider {
+        private final String modId;
+
+        public BlockModelGenerator(PackOutput packOutput, String modId, ExistingFileHelper existingFileHelper) {
+            super(packOutput, modId, existingFileHelper);
+            this.modId = modId;
+        }
+
+        @Override
+        protected void registerStatesAndModels() {
+            for (LatticeBlock<?> latticeBlock : LatticeRegistries.getBlocks()) {
+                if (isNotFromMod(latticeBlock, this.modId)) continue;
+
+                LatticeBlockModelType modelType = latticeBlock.getModelType();
+                Block defaultBlock = latticeBlock.getDefaultBlock().get();
+                boolean isSameBlock = latticeBlock.get() == defaultBlock;
+
+                if (latticeBlock instanceof LatticeBasicBlock latticeBasicBlock) {
+                    Block block = latticeBasicBlock.get();
+                    String path = this.getPath(latticeBlock);
+
+                    if (modelType == LatticeRegistries.Types.Block.BASIC) {
+                        this.simpleBlockWithItem(block, this.cubeAll(block));
+                    } else if (modelType == LatticeRegistries.Types.Block.WITH_SIDES) {
+                        if (isSameBlock) {
+                            this.simpleBlockWithItem(block, this.models().cubeColumn(path, this.getSide(latticeBlock), this.getBase(latticeBlock)));
+                        } else {
+                            this.simpleBlockWithItem(block, this.models().cubeColumn(path, this.getBase(latticeBlock), this.getBase(defaultBlock)));
+                        }
+                    }
+                } else {
+                    switch (latticeBlock) {
+                        case LatticeStairBlock latticeStairBlock -> {
+                            StairBlock stairBlock = latticeStairBlock.get();
+
+                            if (modelType == LatticeRegistries.Types.Block.BASIC) {
+                                this.stairsBlock(stairBlock, this.blockTexture(latticeStairBlock.getDefaultBlock().get()));
+                            } else if (modelType == LatticeRegistries.Types.Block.WITH_SIDES) {
+                                this.stairsBlockWithRenderType(stairBlock, this.getSide(defaultBlock), this.getBase(defaultBlock), this.getBase(defaultBlock), "cutout");
+                            }
+                        }
+                        case LatticeSlabBlock latticeSlabBlock -> {
+                            SlabBlock slabBlock = latticeSlabBlock.get();
+
+                            if (modelType == LatticeRegistries.Types.Block.BASIC) {
+                                this.slabBlock(slabBlock, this.getBase(defaultBlock), this.getBase(defaultBlock));
+                            } else if (modelType == LatticeRegistries.Types.Block.WITH_SIDES) {
+                                this.slabBlock(slabBlock, this.getBase(defaultBlock), this.getSlab(defaultBlock), this.getBase(defaultBlock), this.getBase(defaultBlock));
+                            }
+                        }
+                        case LatticeWallBlock latticeWallBlock -> {
+                            WallBlock wallBlock = latticeWallBlock.get();
+                            this.wallBlock(wallBlock, this.blockTexture(defaultBlock));
+
+                            continue;
+                        }
+                        default -> {
+                            this.createBlockItem(latticeBlock);
+
+                            continue;
+                        }
+                    }
+
+                    this.createBlockItem(latticeBlock);
+                }
+            }
+        }
+
+        private String getNamespace(@NotNull LatticeBlock<?> latticeBlock) {
+            return this.getNamespace(latticeBlock.get());
+        }
+
+        private String getNamespace(@NotNull Block block) {
+            return BuiltInRegistries.BLOCK.getKey(block).getNamespace();
+        }
+
+        private String getPath(@NotNull LatticeBlock<?> latticeBlock) {
+            return this.getPath(latticeBlock.get());
+        }
+
+        private String getPath(@NotNull Block block) {
+            return BuiltInRegistries.BLOCK.getKey(block).getPath();
+        }
+
+        private ResourceLocation getTexture(@NotNull Block block, @Nullable String extension) {
+            return ResourceLocation.fromNamespaceAndPath(this.getNamespace(block), "block/" + this.getPath(block) + ((extension == null) ? "" : "_" + extension));
+        }
+
+//        private ResourceLocation getTexture(@NotNull Block block, @Nullable String extension) {
+//            return this.modLoc("block/" + this.getPath(block) + ((extension == null) ? "" : "_" + extension));
+//        }
+
+        private ResourceLocation getBase(@NotNull LatticeBlock<?> latticeBlock) {
+            return this.getBase(latticeBlock.get());
+        }
+
+        private ResourceLocation getBase(@NotNull Block block) {
+            return this.getTexture(block, null);
+        }
+
+        private ResourceLocation getSide(@NotNull LatticeBlock<?> latticeBlock) {
+            return this.getSide(latticeBlock.get());
+        }
+
+        private ResourceLocation getSide(@NotNull Block block) {
+            return this.getTexture(block, "side");
+        }
+
+        private ResourceLocation getTop(@NotNull LatticeBlock<?> latticeBlock) {
+            return this.getTop(latticeBlock.get());
+        }
+
+        private ResourceLocation getTop(@NotNull Block block) {
+            return this.getTexture(block, "top");
+        }
+
+        private ResourceLocation getBottom(@NotNull LatticeBlock<?> latticeBlock) {
+            return this.getBottom(latticeBlock.get());
+        }
+
+        private ResourceLocation getBottom(@NotNull Block block) {
+            return this.getTexture(block, "bottom");
+        }
+
+        private ResourceLocation getSlab(@NotNull Block block) {
+            return this.getTexture(block, "slab");
+        }
+
+        private void createBlockItem(@NotNull LatticeBlock<?> latticeBlock) {
+            this.simpleBlockItem(latticeBlock.get(), new ModelFile.UncheckedModelFile(latticeBlock.getModId() + ":block/" + this.getPath(latticeBlock)));
+        }
+    }
+
     public static <I extends LatticeObject> boolean isNotFromMod(@NotNull I latticeObject, @NotNull String modId) {
         return !latticeObject.getModId().equals(modId);
     }
 
-    public static void addListeners(@NotNull IEventBus modEventBus, @NotNull String modId) {
-        modEventBus.addListener((GatherDataEvent event) -> onGatherDataEvent(event, modId));
+    public static void addListeners(@NotNull IEventBus modEventBus, @NotNull ModContainer modContainer) {
+        modEventBus.addListener((GatherDataEvent event) -> onGatherDataEvent(event, modContainer.getModId()));
     }
 }

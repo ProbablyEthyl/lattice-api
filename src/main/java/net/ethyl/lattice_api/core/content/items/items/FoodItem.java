@@ -15,7 +15,7 @@ import java.util.List;
 public class FoodItem extends Item {
     private final boolean hasDescription;
 
-    public FoodItem(@NotNull LatticeFoodItem.AppendableBuilder<Item, ? extends LatticeItem<Item>, ?> builder) {
+    public FoodItem(@NotNull LatticeFoodItem.AppendableBuilder<? extends LatticeItem<Item>, ?> builder) {
         super(builder.getItemProperties().food(builder.getFoodProperties().build()));
         this.hasDescription = builder.getHasDescription();
     }

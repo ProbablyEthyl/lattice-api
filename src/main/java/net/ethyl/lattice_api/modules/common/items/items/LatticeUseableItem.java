@@ -16,31 +16,34 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class LatticeUseableItem extends LatticeItem<Item> {
-    protected LatticeUseableItem(@NotNull RegistryId registryId, @NotNull DeferredItem<Item> deferredItem, @NotNull AppendableBuilder<Item, ? extends LatticeItem<Item>, ?> builder) {
+public class LatticeUseableItem extends LatticeBasicItem {
+    protected final TriConsumer<Level, Player, InteractionHand> use;
+    protected final Consumer<UseOnContext> useOn;
+
+    protected LatticeUseableItem(@NotNull RegistryId registryId, @NotNull DeferredItem<Item> deferredItem, @NotNull AppendableBuilder<? extends LatticeItem<Item>, ?> builder) {
         super(registryId, deferredItem, builder);
+        this.use = builder.getUse();
+        this.useOn = builder.getUseOn();
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public TriConsumer<Level, Player, InteractionHand> getUse() {
+        return this.use;
     }
 
-    public static class Builder extends AppendableBuilder<Item, LatticeUseableItem, Builder> {
-        protected Builder() {
-            super(LatticeUseableItem::new, UseableItem::new);
-        }
+    public Consumer<UseOnContext> getUseOn() {
+        return this.useOn;
     }
 
-    public static class AppendableBuilder<T extends Item, I extends LatticeItem<T>, B extends AppendableBuilder<T, I, B>> extends LatticeItem.AppendableBuilder<T, I, B> {
-        protected TriConsumer<Level, Player, InteractionHand> use = (level, player, interactionHand) -> {};
-        protected Consumer<UseOnContext> useOn = (useOnContext) -> {};
+    public static AppendableBuilder<? extends LatticeUseableItem, ?> builder() {
+        return new AppendableBuilder<>(LatticeUseableItem::new, UseableItem::new);
+    }
 
-        protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredItem<T>, B, I> latticeFactory, @NotNull Function<B, T> itemFactory) {
+    public static class AppendableBuilder<I extends LatticeUseableItem, B extends AppendableBuilder<I, B>> extends LatticeBasicItem.AppendableBuilder<I, B> {
+        private TriConsumer<Level, Player, InteractionHand> use = (level, player, interactionHand) -> {};
+        private Consumer<UseOnContext> useOn = (useOnContext) -> {};
+
+        protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredItem<Item>, B, I> latticeFactory, @NotNull Function<B, Item> itemFactory) {
             super(latticeFactory, itemFactory);
-        }
-
-        public TriConsumer<Level, Player, InteractionHand> getUse() {
-            return this.use;
         }
 
         public B use(@NotNull TriConsumer<Level, Player, InteractionHand> use) {
@@ -49,14 +52,18 @@ public class LatticeUseableItem extends LatticeItem<Item> {
             return this.self();
         }
 
-        public Consumer<UseOnContext> getUseOn() {
-            return this.useOn;
+        public TriConsumer<Level, Player, InteractionHand> getUse() {
+            return this.use;
         }
 
         public B useOn(@NotNull Consumer<UseOnContext> useOn) {
             this.useOn = useOn;
 
             return this.self();
+        }
+
+        public Consumer<UseOnContext> getUseOn() {
+            return this.useOn;
         }
     }
 }
