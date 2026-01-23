@@ -1,7 +1,9 @@
 package net.ethyl.lattice_api.core.data;
 
+import net.ethyl.lattice_api.LatticeApi;
+import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.modules.base.*;
-import net.ethyl.lattice_api.modules.common.RecipeTypes.LatticeShapedRecipe;
+import net.ethyl.lattice_api.modules.common.RecipeTypes.*;
 import net.ethyl.lattice_api.modules.common.blocks.LatticeBasicBlock;
 import net.ethyl.lattice_api.modules.common.blocks.LatticeWallBlock;
 import net.ethyl.lattice_api.modules.common.blocks.LatticeSlabBlock;
@@ -24,16 +26,15 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.data.loot.LootTableProvider;
-import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.*;
 import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -56,11 +57,13 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 public class LatticeDataGen {
     public static void onGatherDataEvent(GatherDataEvent event, String modId) {
@@ -323,29 +326,214 @@ public class LatticeDataGen {
             for (LatticeRecipe latticeRecipe : LatticeRegistries.getRecipes()) {
                 if (isNotFromMod(latticeRecipe, this.modId)) continue;
 
-                ResourceLocation recipeId = latticeRecipe.getRegistryId().toResourceLoc();
+                RegistryId registryId = latticeRecipe.getRegistryId();
+                ResourceLocation recipeId = registryId.toResourceLoc();
                 RecipeCategory recipeCategory = latticeRecipe.getCategory();
-                Supplier<Item> result = latticeRecipe.getResult();
-                int resultCount = latticeRecipe.getResultCount();
+                Collection<Supplier<Item>> result = latticeRecipe.getResult();
+                int count = latticeRecipe.getResultCount();
+                int resultAmount = result.size();
+                String unlockId = latticeRecipe.getUnlockId();
                 String groupId = latticeRecipe.getGroup();
+                Item unlockItem = latticeRecipe.getUnlockItem().get();
+
+                if (result.isEmpty()) {
+                    incompleteObjectErr(registryId);
+                }
 
                 switch (latticeRecipe) {
                     case LatticeShapedRecipe latticeShapedRecipe -> {
-                        ShapedRecipeBuilder builder = ShapedRecipeBuilder.shaped(recipeCategory, result.get(), resultCount);
+                        Map<Character, Collection<Supplier<Item>>> ingredientList = latticeShapedRecipe.getDefined();
 
-                        latticeShapedRecipe.getPattern().values().forEach(builder::pattern);
+                        if (resultAmount > 1) {
+                            AtomicBoolean failedTest = new AtomicBoolean(true);
 
-                        latticeShapedRecipe.getDefined().forEach((key, value) -> builder.define(key, value.get()));
+                            ingredientList.values().forEach(ingredients -> {
+                                if (ingredients.size() == resultAmount) {
+                                    failedTest.set(false);
+                                }
+                            });
 
-                        builder.unlockedBy(latticeShapedRecipe.getUnlockId(), has(latticeShapedRecipe.getUnlockItem().get()));
-                        builder.group(groupId);
-                        builder.save(recipeOutput, recipeId);
+                            if (failedTest.get()) {
+                                incompleteObjectErr(registryId);
+                            }
+                        }
+
+                        AtomicInteger resultIndex = new AtomicInteger(0);
+
+                        result.forEach(resultSupplier -> {
+                            ShapedRecipeBuilder builder = ShapedRecipeBuilder.shaped(recipeCategory, resultSupplier.get(), count);
+                            AtomicReference<Supplier<Item>> reference = new AtomicReference<>(() -> ((List<Supplier<Item>>) result).get(resultIndex.get()).get());
+                            AtomicReference<String> prefix = new AtomicReference<>("");
+                            AtomicReference<String> suffix = new AtomicReference<>("");
+
+                            latticeShapedRecipe.getPattern().values().forEach(builder::pattern);
+
+                            ingredientList.forEach((c, ingredients) -> {
+                                if (resultAmount == 1 || ingredients.size() != resultAmount) {
+                                    builder.define(c, Ingredient.of(ingredients.stream().map(Supplier::get).map(ItemStack::new)));
+                                } else {
+                                    if (latticeShapedRecipe instanceof LatticeShapedDyeRecipe latticeShapedDyeRecipe && latticeShapedDyeRecipe.isDyeable(c)) {
+                                        builder.define(c, Ingredient.of(IntStream.range(0, ingredients.size()).filter(i -> i != resultIndex.get()).mapToObj(i -> new ItemStack(((List<Supplier<Item>>) ingredients).get(i).get()))));
+                                        prefix.set("dye");
+                                    } else {
+                                        int index = 0;
+
+                                        for (Supplier<Item> ingredientSupplier : ingredients) {
+                                            if (index == resultIndex.get() && reference.get() != ingredientSupplier.get()) {
+                                                builder.define(c, ingredientSupplier.get());
+
+                                                if (!(latticeShapedRecipe instanceof LatticeShapedDyeRecipe)) {
+                                                    suffix.set("from_" + getKeyPath(ingredientSupplier.get()));
+                                                }
+
+                                                break;
+                                            }
+
+                                            index++;
+                                        }
+                                    }
+                                }
+                            });
+
+                            latticeShapedRecipe.getDefinedTags().forEach(builder::define);
+
+                            builder.unlockedBy(unlockId, has(unlockItem));
+                            builder.group(groupId);
+                            builder.save(recipeOutput, (resultAmount != 1 ? (recipeId.getNamespace() + ":" + (prefix.get().isEmpty() ? "" : prefix.get() + "_") + getKeyPath(reference.get().get()) + (suffix.get().isEmpty() ? "" : "_" + suffix.get()) + "_shaped") : recipeId).toString());
+                            resultIndex.incrementAndGet();
+                        });
                     }
+                    case LatticeShapelessRecipe latticeShapelessRecipe -> {
+                        Map<Integer, Collection<Supplier<Item>>> ingredientList = latticeShapelessRecipe.getIngredients();
 
+                        if (resultAmount > 1) {
+                            AtomicBoolean failedTest = new AtomicBoolean(true);
+
+                            ingredientList.values().forEach(ingredients -> {
+                                if (ingredients.size() == resultAmount) {
+                                    failedTest.set(false);
+                                }
+                            });
+
+                            if (failedTest.get()) {
+                                incompleteObjectErr(registryId);
+                            }
+                        }
+
+                        AtomicInteger resultIndex = new AtomicInteger(0);
+
+                        result.forEach(resultSupplier -> {
+                            ShapelessRecipeBuilder builder = ShapelessRecipeBuilder.shapeless(recipeCategory, resultSupplier.get(), count);
+                            AtomicReference<Supplier<Item>> reference = new AtomicReference<>(() -> ((List<Supplier<Item>>) result).get(resultIndex.get()).get());
+                            AtomicReference<String> prefix = new AtomicReference<>("");
+                            AtomicReference<String> suffix = new AtomicReference<>("");
+
+                            ingredientList.forEach((ingredientNumber, ingredients) -> {
+                                if (resultAmount == 1 || ingredients.size() != resultAmount) {
+                                    builder.requires(Ingredient.of(ingredients.stream().map(Supplier::get).map(ItemStack::new)));
+                                } else {
+                                    if (latticeShapelessRecipe instanceof LatticeShapelessDyeRecipe latticeShapelessDyeRecipe && latticeShapelessDyeRecipe.isDyeable(ingredientNumber)) {
+                                        builder.requires(Ingredient.of(IntStream.range(0, ingredients.size()).filter(i -> i != resultIndex.get()).mapToObj(i -> new ItemStack(((List<Supplier<Item>>) ingredients).get(i).get()))));
+                                        prefix.set("dye");
+                                    } else {
+                                        int index = 0;
+
+                                        for (Supplier<Item> ingredientSupplier : ingredients) {
+                                            if (index == resultIndex.get() && reference.get() != ingredientSupplier.get()) {
+                                                builder.requires(ingredientSupplier.get());
+
+                                                if (!(latticeShapelessRecipe instanceof LatticeShapelessDyeRecipe)) {
+                                                    suffix.set("from_" + getKeyPath(ingredientSupplier.get()));
+                                                }
+
+                                                break;
+                                            }
+
+                                            index++;
+                                        }
+                                    }
+                                }
+                            });
+
+                            latticeShapelessRecipe.getIngredientTags().values().forEach(builder::requires);
+
+                            builder.unlockedBy(unlockId, has(unlockItem));
+                            builder.group(groupId);
+                            builder.save(recipeOutput, (resultAmount != 1 ? (recipeId.getNamespace() + ":" + (prefix.get().isEmpty() ? "" : prefix.get() + "_") + getKeyPath(reference.get().get()) + (suffix.get().isEmpty() ? "" : "_" + suffix.get()) + "_shapeless") : recipeId).toString());
+                            resultIndex.incrementAndGet();
+                        });
+                    }
+                    case LatticeCookingRecipe latticeCookingRecipe -> {
+                        Map<Integer, Map<Collection<Supplier<Item>>, Float>> ingredientList = latticeCookingRecipe.getIngredients();
+
+                        if (latticeCookingRecipe.getIngredients().isEmpty() || latticeCookingRecipe.getSerializers().isEmpty() || ingredientList.size() != resultAmount) {
+                            incompleteObjectErr(registryId);
+                        }
+
+                        AtomicInteger resultIndex = new AtomicInteger(0);
+
+                        result.forEach(resultSupplier -> {
+                            AtomicReference<SimpleCookingRecipeBuilder> builder = new AtomicReference<>();
+                            AtomicReference<Supplier<Item>> reference = new AtomicReference<>(() -> ((List<Supplier<Item>>) result).get(resultIndex.get()).get());
+                            AtomicReference<String> suffix = new AtomicReference<>("");
+
+                            ingredientList.forEach((index, ingredientData) -> ingredientData.forEach((ingredients, experience) -> {
+                                String ingredientReference = getKeyPath(((List<Supplier<Item>>) ingredients).getLast().get());
+
+
+                                if (resultIndex.get() == index) {
+                                    latticeCookingRecipe.getSerializers().forEach((recipeSerializer, cookingTime) -> {
+                                        String type = null;
+
+                                        if (recipeSerializer == RecipeSerializer.SMELTING_RECIPE) {
+                                            builder.set(this.smeltingRecipe(ingredients, recipeCategory, resultSupplier, experience, cookingTime));
+                                            type = "smelting";
+                                        } else if (recipeSerializer == RecipeSerializer.BLASTING_RECIPE) {
+                                            builder.set(this.blastingRecipe(ingredients, recipeCategory, resultSupplier, experience, cookingTime));
+                                            type = "blasting";
+                                        } else if (recipeSerializer == RecipeSerializer.SMOKING_RECIPE) {
+                                            builder.set(this.smokingRecipe(ingredients, recipeCategory, resultSupplier, experience, cookingTime));
+                                            type = "smoking";
+                                        }
+
+                                        if (type != null) {
+                                            suffix.set("_" + type + "_from_" + ingredientReference);
+                                        }
+
+                                        SimpleCookingRecipeBuilder recipeBuilder = builder.get();
+
+                                        if (recipeBuilder != null) {
+                                            recipeBuilder.unlockedBy(unlockId, has(unlockItem));
+                                            recipeBuilder.group(groupId);
+                                            recipeBuilder.save(recipeOutput, (resultAmount != 1 ? (recipeId.getNamespace() + ":" + getKeyPath(reference.get().get()) + suffix) : recipeId).toString());
+                                        }
+                                    });
+                                }
+                            }));
+
+                            resultIndex.incrementAndGet();
+                        });
+                    }
                     default -> {
                     }
                 }
             }
+        }
+
+        private SimpleCookingRecipeBuilder smeltingRecipe(Collection<Supplier<Item>> ingredients, RecipeCategory recipeCategory, Supplier<Item> resultSupplier, float experience, int cookingTime) {
+            return this.CookingRecipeBuilder(ingredients, recipeCategory, resultSupplier, experience, cookingTime, RecipeSerializer.SMELTING_RECIPE, SmeltingRecipe::new);
+        }
+
+        private SimpleCookingRecipeBuilder blastingRecipe(Collection<Supplier<Item>> ingredients, RecipeCategory recipeCategory, Supplier<Item> resultSupplier, float experience, int cookingTime) {
+            return this.CookingRecipeBuilder(ingredients, recipeCategory, resultSupplier, experience, cookingTime, RecipeSerializer.BLASTING_RECIPE, BlastingRecipe::new);
+        }
+
+        private SimpleCookingRecipeBuilder smokingRecipe(Collection<Supplier<Item>> ingredients, RecipeCategory recipeCategory, Supplier<Item> resultSupplier, float experience, int cookingTime) {
+            return this.CookingRecipeBuilder(ingredients, recipeCategory, resultSupplier, experience, cookingTime, RecipeSerializer.SMOKING_RECIPE, SmokingRecipe::new);
+        }
+
+        private <T extends AbstractCookingRecipe> SimpleCookingRecipeBuilder CookingRecipeBuilder(Collection<Supplier<Item>> ingredients, RecipeCategory recipeCategory, Supplier<Item> resultSupplier, float experience, int cookingTime, RecipeSerializer<T> recipeSerializer, AbstractCookingRecipe.Factory<T> factory) {
+            return SimpleCookingRecipeBuilder.generic(Ingredient.of(ingredients.stream().map(Supplier::get).map(ItemStack::new)), recipeCategory, resultSupplier.get(), experience, cookingTime, recipeSerializer, factory);
         }
     }
 
@@ -378,27 +566,19 @@ public class LatticeDataGen {
             }
         }
 
-        private String getPath(@NotNull LatticeBlock<?> latticeBlock) {
-            return this.getPath(latticeBlock.get());
-        }
-
-        private String getPath(@NotNull Block block) {
-            return BuiltInRegistries.BLOCK.getKey(block).getPath();
-        }
-
         private String getModId(@NotNull LatticeBlock<?> latticeBlock) {
             return this.getModId(latticeBlock.get());
         }
 
         private String getModId(@NotNull Block block) {
-            return BuiltInRegistries.BLOCK.getKey(block).getNamespace();
+            return getKeyNamespace(block);
         }
 
         protected void wallItem(@NotNull LatticeWallBlock latticeWallBlock) {
             Block baseBlock = latticeWallBlock.getDefaultBlock().get();
 
-            this.withExistingParent(this.getPath(latticeWallBlock), this.mcLoc("block/wall_inventory"))
-                    .texture("wall", ResourceLocation.fromNamespaceAndPath(this.getModId(baseBlock), "block/" + this.getPath(baseBlock)));
+            this.withExistingParent(getKeyPath(latticeWallBlock), this.mcLoc("block/wall_inventory"))
+                    .texture("wall", ResourceLocation.fromNamespaceAndPath(this.getModId(baseBlock), "block/" + getKeyPath(baseBlock)));
         }
     }
 
@@ -421,7 +601,7 @@ public class LatticeDataGen {
 
                 if (latticeBlock instanceof LatticeBasicBlock latticeBasicBlock) {
                     Block block = latticeBasicBlock.get();
-                    String path = this.getPath(latticeBlock);
+                    String path = getKeyPath(latticeBlock);
 
                     if (modelType == LatticeRegistries.Types.Block.BASIC) {
                         this.simpleBlockWithItem(block, this.cubeAll(block));
@@ -470,29 +650,9 @@ public class LatticeDataGen {
             }
         }
 
-        private String getNamespace(@NotNull LatticeBlock<?> latticeBlock) {
-            return this.getNamespace(latticeBlock.get());
-        }
-
-        private String getNamespace(@NotNull Block block) {
-            return BuiltInRegistries.BLOCK.getKey(block).getNamespace();
-        }
-
-        private String getPath(@NotNull LatticeBlock<?> latticeBlock) {
-            return this.getPath(latticeBlock.get());
-        }
-
-        private String getPath(@NotNull Block block) {
-            return BuiltInRegistries.BLOCK.getKey(block).getPath();
-        }
-
         private ResourceLocation getTexture(@NotNull Block block, @Nullable String extension) {
-            return ResourceLocation.fromNamespaceAndPath(this.getNamespace(block), "block/" + this.getPath(block) + ((extension == null) ? "" : "_" + extension));
+            return ResourceLocation.fromNamespaceAndPath(getKeyNamespace(block), "block/" + getKeyPath(block) + ((extension == null) ? "" : "_" + extension));
         }
-
-//        private ResourceLocation getTexture(@NotNull Block block, @Nullable String extension) {
-//            return this.modLoc("block/" + this.getPath(block) + ((extension == null) ? "" : "_" + extension));
-//        }
 
         private ResourceLocation getBase(@NotNull LatticeBlock<?> latticeBlock) {
             return this.getBase(latticeBlock.get());
@@ -531,8 +691,52 @@ public class LatticeDataGen {
         }
 
         private void createBlockItem(@NotNull LatticeBlock<?> latticeBlock) {
-            this.simpleBlockItem(latticeBlock.get(), new ModelFile.UncheckedModelFile(latticeBlock.getModId() + ":block/" + this.getPath(latticeBlock)));
+            this.simpleBlockItem(latticeBlock.get(), new ModelFile.UncheckedModelFile(latticeBlock.getModId() + ":block/" + getKeyPath(latticeBlock)));
         }
+    }
+
+    private static String getKeyNamespace(@NotNull LatticeBlock<?> latticeBlock) {
+        return getKeyNamespace(latticeBlock.get());
+    }
+
+    private static String getKeyPath(@NotNull LatticeBlock<?> latticeBlock) {
+        return getKeyPath(latticeBlock.get());
+    }
+
+    private static String getKeyNamespace(@NotNull Block block) {
+        return getKey(block).getNamespace();
+    }
+
+    private static String getKeyPath(@NotNull Block block) {
+        return getKey(block).getPath();
+    }
+
+    private static String getKeyNamespace(@NotNull LatticeItem<?> latticeItem) {
+        return getKeyNamespace(latticeItem.get());
+    }
+
+    private static String getKeyPath(@NotNull LatticeItem<?> latticeItem) {
+        return getKeyPath(latticeItem.get());
+    }
+
+    private static String getKeyNamespace(@NotNull Item item) {
+        return getKey(item).getNamespace();
+    }
+
+    private static String getKeyPath(@NotNull Item item) {
+        return getKey(item).getPath();
+    }
+
+    private static ResourceLocation getKey(@NotNull Block block) {
+        return BuiltInRegistries.BLOCK.getKey(block);
+    }
+
+    private static ResourceLocation getKey(@NotNull Item item) {
+        return BuiltInRegistries.ITEM.getKey(item);
+    }
+
+    private static void incompleteObjectErr(@NotNull RegistryId registryId) {
+        LatticeApi.incompleteObjectErr(registryId);
     }
 
     public static <I extends LatticeObject> boolean isNotFromMod(@NotNull I latticeObject, @NotNull String modId) {

@@ -4,44 +4,41 @@ import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeBlock;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.ethyl.lattice_api.modules.base.LatticeRecipe;
+import net.ethyl.lattice_api.modules.common.tags.LatticeItemTag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class LatticeShapedRecipe extends LatticeRecipe {
     private final Map<Integer, String> recipePattern;
-    private final Map<Character, Supplier<Item>> recipeDefiner;
-    private final String unlockId;
-    private final Supplier<Item> unlockItem;
+    private final Map<Character, Collection<Supplier<Item>>> recipeDefiner;
+    private final Map<Character, TagKey<Item>> recipeDefinerTags;
 
     protected LatticeShapedRecipe(@NotNull RegistryId registryId, @NotNull AppendableBuilder<? extends LatticeRecipe, ?> builder) {
         super(registryId, builder);
         this.recipePattern = builder.recipePattern;
         this.recipeDefiner = builder.recipeDefiner;
-        this.unlockId = builder.unlockId;
-        this.unlockItem = builder.unlockItem;
+        this.recipeDefinerTags = builder.recipeDefinerTags;
     }
 
     public Map<Integer, String> getPattern() {
         return this.recipePattern;
     }
 
-    public Map<Character, Supplier<Item>> getDefined() {
+    public Map<Character, Collection<Supplier<Item>>> getDefined() {
         return this.recipeDefiner;
     }
 
-    public String getUnlockId() {
-        return this.unlockId;
-    }
-
-    public Supplier<Item> getUnlockItem() {
-        return this.unlockItem;
+    public Map<Character, TagKey<Item>> getDefinedTags() {
+        return this.recipeDefinerTags;
     }
 
     public static AppendableBuilder<? extends LatticeShapedRecipe, ?> builder() {
@@ -50,11 +47,10 @@ public class LatticeShapedRecipe extends LatticeRecipe {
 
     public static class AppendableBuilder<I extends LatticeShapedRecipe, B extends AppendableBuilder<I, B>> extends LatticeRecipe.AppendableBuilder<I, B> {
         private final Map<Integer, String> recipePattern = new HashMap<>();
-        private final Map<Character, Supplier<Item>> recipeDefiner = new HashMap<>();
+        private final Map<Character, Collection<Supplier<Item>>> recipeDefiner = new HashMap<>();
+        private final Map<Character, TagKey<Item>> recipeDefinerTags = new HashMap<>();
 
-        private int currentRow = 0;
-        private String unlockId = "unlock_by";
-        private Supplier<Item> unlockItem = () -> Items.STONE;
+        protected int currentRow = 0;
 
         protected AppendableBuilder(@NotNull BiFunction<RegistryId, B, I> latticeFactory) {
             super(latticeFactory);
@@ -64,6 +60,10 @@ public class LatticeShapedRecipe extends LatticeRecipe {
             StringBuilder input = new StringBuilder();
             int inputLength = Math.min(3, pattern.length());
             int remaining = inputLength;
+
+            if (this.currentRow >= 3) {
+                return this.self();
+            }
 
             if (this.currentRow > 0) {
                 for (Map.Entry<Integer, String> entry : this.recipePattern.entrySet()) {
@@ -108,30 +108,23 @@ public class LatticeShapedRecipe extends LatticeRecipe {
         }
 
         private B define(char character, @NotNull Supplier<Item> itemSupplier) {
-            this.recipeDefiner.put(character, itemSupplier);
+            this.recipeDefiner.put(character, List.of(itemSupplier));
 
             return this.self();
         }
 
-        public B unlockedBy(@NotNull String id, @NotNull LatticeBlock<?> latticeBlock) {
-            return this.has(id, latticeBlock::asItem);
+        public B define(char character, @NotNull Collection<Supplier<Item>> items) {
+            this.recipeDefiner.put(character, items);
+
+            return this.self();
         }
 
-        public B unlockedBy(@NotNull String id, @NotNull Block block) {
-            return this.has(id, block::asItem);
+        public B define(char character, @NotNull LatticeItemTag latticeItemTag) {
+            return this.define(character, latticeItemTag.get());
         }
 
-        public B unlockedBy(@NotNull String id, @NotNull LatticeItem<?> latticeItem) {
-            return this.has(id, latticeItem::get);
-        }
-
-        public B unlockedBy(@NotNull String id, @NotNull Item item) {
-            return this.has(id, () -> item);
-        }
-
-        private B has(@NotNull String id, @NotNull Supplier<Item> itemSupplier) {
-            this.unlockId = id;
-            this.unlockItem = itemSupplier;
+        public B define(char character, @NotNull TagKey<Item> tagKey) {
+            this.recipeDefinerTags.put(character, tagKey);
 
             return this.self();
         }

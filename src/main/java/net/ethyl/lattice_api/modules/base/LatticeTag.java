@@ -2,12 +2,8 @@ package net.ethyl.lattice_api.modules.base;
 
 import net.ethyl.lattice_api.core.instances.LatticeBuilder;
 import net.ethyl.lattice_api.core.instances.RegistryId;
-import net.ethyl.lattice_api.modules.common.tags.LatticeBlockTag;
-import net.ethyl.lattice_api.modules.common.tags.LatticeItemTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
 import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
 

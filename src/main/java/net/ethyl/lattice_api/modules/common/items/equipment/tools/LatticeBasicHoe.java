@@ -27,7 +27,7 @@ public class LatticeBasicHoe extends LatticeItem<HoeItem> {
         return new AppendableBuilder<>(LatticeBasicHoe::new, BasicHoe::new);
     }
 
-    public static class AppendableBuilder<I extends LatticeItem<HoeItem>, B extends AppendableBuilder<I, B>> extends LatticeItem.AppendableBuilder.Tool<HoeItem, I, B> {
+    public static class AppendableBuilder<I extends LatticeBasicHoe, B extends AppendableBuilder<I, B>> extends LatticeItem.AppendableBuilder.Tool<HoeItem, I, B> {
         protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredItem<HoeItem>, B, I> latticeFactory, @NotNull Function<B, HoeItem> itemFactory) {
             super(latticeFactory, itemFactory);
         }

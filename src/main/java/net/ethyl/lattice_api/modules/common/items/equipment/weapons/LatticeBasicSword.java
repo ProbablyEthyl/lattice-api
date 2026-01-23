@@ -28,7 +28,7 @@ public class LatticeBasicSword extends LatticeItem<SwordItem> {
     }
 
 
-    public static class AppendableBuilder<I extends LatticeItem<SwordItem>, B extends AppendableBuilder<I, B>> extends LatticeItem.AppendableBuilder.Tool<SwordItem, I, B> {
+    public static class AppendableBuilder<I extends LatticeBasicSword, B extends AppendableBuilder<I, B>> extends LatticeItem.AppendableBuilder.Tool<SwordItem, I, B> {
         protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredItem<SwordItem>, B, I> latticeFactory, @NotNull Function<B, SwordItem> itemFactory) {
             super(latticeFactory, itemFactory);
         }

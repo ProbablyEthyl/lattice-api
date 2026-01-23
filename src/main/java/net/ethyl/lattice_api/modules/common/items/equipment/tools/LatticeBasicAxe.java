@@ -27,7 +27,7 @@ public class LatticeBasicAxe extends LatticeItem<AxeItem> {
         return new AppendableBuilder<>(LatticeBasicAxe::new, BasicAxe::new);
     }
 
-    public static class AppendableBuilder<I extends LatticeItem<AxeItem>, B extends AppendableBuilder<I, B>> extends LatticeItem.AppendableBuilder.Tool<AxeItem, I, B> {
+    public static class AppendableBuilder<I extends LatticeBasicAxe, B extends AppendableBuilder<I, B>> extends LatticeItem.AppendableBuilder.Tool<AxeItem, I, B> {
         protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredItem<AxeItem>, B, I> latticeFactory, @NotNull Function<B, AxeItem> itemFactory) {
             super(latticeFactory, itemFactory);
         }

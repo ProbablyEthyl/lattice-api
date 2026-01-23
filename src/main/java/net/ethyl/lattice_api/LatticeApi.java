@@ -1,12 +1,10 @@
 package net.ethyl.lattice_api;
 
 import com.mojang.logging.LogUtils;
-import net.ethyl.lattice_api.core.data.LatticeDataGen;
 import net.ethyl.lattice_api.core.data.LatticeRegistries;
 import net.ethyl.lattice_api.core.instances.Events;
 import net.ethyl.lattice_api.core.instances.RegistryId;
 import net.ethyl.lattice_api.core.utils.ErrUtils;
-import net.ethyl.lattice_api.modules.common.items.equipment.tools.LatticeBasicPickaxe;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -19,17 +17,10 @@ public class LatticeApi {
     public static final String MOD_ID = "lattice_api";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public static final LatticeRegistries.Items ITEMS = LatticeRegistries.createItems(LatticeApi.MOD_ID);
-
-    public static final LatticeBasicPickaxe PICK = ITEMS.register("basic_pick", LatticeBasicPickaxe.builder());
-
     public LatticeApi(IEventBus modEventBus, ModContainer modContainer) {
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         LatticeRegistries.register(modEventBus);
         Events.addListener();
-
-        ITEMS.register(modEventBus);
-        LatticeDataGen.addListeners(modEventBus, modContainer);
     }
 
     public static void invalidIdErr(@NotNull RegistryId registryId) {

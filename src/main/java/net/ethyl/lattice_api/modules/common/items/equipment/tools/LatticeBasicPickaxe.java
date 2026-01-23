@@ -27,7 +27,7 @@ public class LatticeBasicPickaxe extends LatticeItem<PickaxeItem> {
         return new AppendableBuilder<>(LatticeBasicPickaxe::new, BasicPickaxe::new);
     }
 
-    public static class AppendableBuilder<I extends LatticeItem<PickaxeItem>, B extends AppendableBuilder<I, B>> extends LatticeItem.AppendableBuilder.Tool<PickaxeItem, I, B> {
+    public static class AppendableBuilder<I extends LatticeBasicPickaxe, B extends AppendableBuilder<I, B>> extends LatticeItem.AppendableBuilder.Tool<PickaxeItem, I, B> {
         protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredItem<PickaxeItem>, B, I> latticeFactory, @NotNull Function<B, PickaxeItem> itemFactory) {
             super(latticeFactory, itemFactory);
         }
