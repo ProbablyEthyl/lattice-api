@@ -1,7 +1,6 @@
 package net.ethyl.lattice_api.core.utils;
 
 import net.ethyl.lattice_api.core.instances.RegistryId;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
