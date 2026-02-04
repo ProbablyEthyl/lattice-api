@@ -19,10 +19,6 @@ public class CoreUtils {
         for (String descriptionEntry : description) tooltipComponents.add(Component.literal(descriptionEntry));
     }
 
-    public static List<Integer> convertToInt(@NotNull BlockPos blockPos) {
-        return List.of(blockPos.getX(), blockPos.getY(), blockPos.getZ());
-    }
-
     public static String camelToSnakeCase(@NotNull String input) {
         StringBuilder result = new StringBuilder();
 
