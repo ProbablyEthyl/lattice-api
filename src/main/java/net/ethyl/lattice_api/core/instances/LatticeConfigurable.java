@@ -35,12 +35,20 @@ public class LatticeConfigurable<T> {
         return new StringList(List.of(defaultValues));
     }
 
+    public static StringList emptyStrings() {
+        return new StringList(List.of());
+    }
+
     public static Integer from(@NotNull java.lang.Integer defaultValue) {
         return new Integer(defaultValue);
     }
 
     public static IntegerList from(@NotNull java.lang.Integer... defaultValues) {
         return new IntegerList(List.of(defaultValues));
+    }
+
+    public static IntegerList emptyIntegers() {
+        return new IntegerList(List.of());
     }
 
     public static Float from(@NotNull java.lang.Float defaultValue) {
@@ -51,12 +59,20 @@ public class LatticeConfigurable<T> {
         return new FloatList(List.of(defaultValues));
     }
 
+    public static FloatList emptyFloats() {
+        return new FloatList(List.of());
+    }
+
     public static Boolean from(@NotNull java.lang.Boolean defaultValue) {
         return new Boolean(defaultValue);
     }
 
     public static BooleanList from(@NotNull java.lang.Boolean... defaultValues) {
         return new BooleanList(List.of(defaultValues));
+    }
+
+    public static BooleanList emptyBooleans() {
+        return new BooleanList(List.of());
     }
 
     public static class String extends LatticeConfigurable<java.lang.String> {
