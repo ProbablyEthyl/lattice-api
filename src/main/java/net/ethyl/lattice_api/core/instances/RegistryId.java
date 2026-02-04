@@ -1,7 +1,7 @@
 package net.ethyl.lattice_api.core.instances;
 
-import net.ethyl.lattice_api.LatticeApi;
 import net.ethyl.lattice_api.core.utils.CoreUtils;
+import net.ethyl.lattice_api.core.utils.ErrUtils;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,7 +14,7 @@ public class RegistryId {
         this.namespace = namespace;
         this.path = path;
 
-        if (CoreUtils.isInvalidId(this)) LatticeApi.invalidIdErr(this);
+        if (CoreUtils.isInvalidId(this)) ErrUtils.invalidIdErr(this);
 
         this.resourceLocation = ResourceLocation.fromNamespaceAndPath(namespace, path);
     }

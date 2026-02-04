@@ -12,7 +12,11 @@ public class ErrUtils {
         throw new InstantiationError("The mod '" + registryId.getNamespace() + "' tried to register an already existing object! Key: '" + registryId.getPath() + "'!");
     }
 
-    public static void IncompleteObjectErr(@NotNull RegistryId registryId) {
+    public static void incompleteObjectErr(@NotNull RegistryId registryId) {
         throw new InstantiationError("The mod '" + registryId.getNamespace() + "' tried to register an incomplete object! Key: '" + registryId.getPath() + "'!");
+    }
+
+    public static void illegalAccessErr(@NotNull String fieldName) {
+        throw new RuntimeException("Illegal access at the field '" + fieldName + "'!");
     }
 }

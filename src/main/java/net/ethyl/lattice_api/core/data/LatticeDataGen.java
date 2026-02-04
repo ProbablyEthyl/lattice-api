@@ -1,7 +1,7 @@
 package net.ethyl.lattice_api.core.data;
 
-import net.ethyl.lattice_api.LatticeApi;
 import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.utils.ErrUtils;
 import net.ethyl.lattice_api.modules.base.*;
 import net.ethyl.lattice_api.modules.common.RecipeTypes.*;
 import net.ethyl.lattice_api.modules.common.blocks.LatticeBasicBlock;
@@ -736,7 +736,7 @@ public class LatticeDataGen {
     }
 
     private static void incompleteObjectErr(@NotNull RegistryId registryId) {
-        LatticeApi.incompleteObjectErr(registryId);
+        ErrUtils.incompleteObjectErr(registryId);
     }
 
     public static <I extends LatticeObject> boolean isNotFromMod(@NotNull I latticeObject, @NotNull String modId) {

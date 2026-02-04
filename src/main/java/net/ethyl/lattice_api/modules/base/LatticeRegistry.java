@@ -6,9 +6,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.LinkedList;
 
-public abstract class LatticeRegistry<T extends LatticeObject>  {
+public abstract class LatticeRegistry<I extends LatticeObject>  {
     public final String modId;
-    public final Collection<T> registryContent = new LinkedList<>();
+    public final Collection<I> registryContent = new LinkedList<>();
 
     protected LatticeRegistry(@NotNull String modId) {
         this.modId = modId;

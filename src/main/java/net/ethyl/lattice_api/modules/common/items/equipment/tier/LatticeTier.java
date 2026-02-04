@@ -1,8 +1,8 @@
 package net.ethyl.lattice_api.modules.common.items.equipment.tier;
 
-import net.ethyl.lattice_api.LatticeApi;
 import net.ethyl.lattice_api.core.instances.LatticeBuilder;
 import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.utils.ErrUtils;
 import net.ethyl.lattice_api.modules.base.LatticeBlock;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.ethyl.lattice_api.modules.base.LatticeObject;
@@ -31,7 +31,7 @@ public class LatticeTier extends LatticeObject {
     protected LatticeTier(@NotNull RegistryId registryId, @NotNull AppendableBuilder<? extends LatticeTier, ?> builder) {
         super(registryId);
 
-        if (builder.tagKey == null) LatticeApi.incompleteObjectErr(registryId);
+        if (builder.tagKey == null) ErrUtils.incompleteObjectErr(registryId);
 
         this.tier = builder.generate();
         this.tagKey = builder.tagKey;
