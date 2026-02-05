@@ -116,6 +116,7 @@ public class LatticeItem<T extends Item> extends LatticeObject {
 
             protected Tool(@NotNull TriFunction<RegistryId, DeferredItem<T>, B, I> latticeFactory, @NotNull Function<B, T> itemFactory) {
                 super(latticeFactory, itemFactory);
+                this.modelType(LatticeRegistries.Types.Item.HANDHELD);
             }
 
             public B attribute(@NotNull ItemAttributeModifiers itemAttributeModifiers) {
