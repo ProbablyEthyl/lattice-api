@@ -1,6 +1,6 @@
 package net.ethyl.lattice_api.core.content.items.items;
 
-import net.ethyl.lattice_api.core.utils.CoreUtils;
+import net.ethyl.lattice_api.core.utils.utility.CoreUtils;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.ethyl.lattice_api.modules.common.items.items.LatticeUseableItem;
 import net.minecraft.network.chat.Component;
@@ -40,14 +40,25 @@ public class UseableItem extends Item {
 
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand interactionHand) {
-        this.use.accept(level, player, interactionHand);
+        if (this.use != null) {
+            this.use.accept(level, player, interactionHand);
+            player.swing(interactionHand, true);
+        }
 
         return super.use(level, player, interactionHand);
     }
 
     @Override
     public @NotNull InteractionResult useOn(@NotNull UseOnContext useOnContext) {
-        this.useOn.accept(useOnContext);
+        if (this.useOn != null) {
+            this.useOn.accept(useOnContext);
+
+            Player player = useOnContext.getPlayer();
+
+            if (player != null) {
+                player.swing(InteractionHand.MAIN_HAND, true);
+            }
+        }
 
         return super.useOn(useOnContext);
     }

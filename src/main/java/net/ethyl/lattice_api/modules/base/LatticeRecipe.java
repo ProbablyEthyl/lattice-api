@@ -1,21 +1,20 @@
 package net.ethyl.lattice_api.modules.base;
 
-import net.ethyl.lattice_api.core.instances.LatticeBuilder;
-import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.instances.objects.LatticeBuilder;
+import net.ethyl.lattice_api.core.instances.objects.RegistryId;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class LatticeRecipe extends LatticeObject {
     private final RecipeCategory recipeCategory;
-    private final Collection<Supplier<Item>> result;
+    private final List<Supplier<Item>> result;
     private final int resultCount;
     private final String unlockId;
     private final Supplier<Item> unlockItem;
@@ -35,7 +34,7 @@ public class LatticeRecipe extends LatticeObject {
         return this.recipeCategory;
     }
 
-    public Collection<Supplier<Item>> getResult() {
+    public List<Supplier<Item>> getResult() {
         return this.result;
     }
 
@@ -47,8 +46,8 @@ public class LatticeRecipe extends LatticeObject {
         return this.unlockId;
     }
 
-    public Supplier<Item> getUnlockItem() {
-        return this.unlockItem;
+    public Item getUnlockItem() {
+        return this.unlockItem.get();
     }
 
     public String getGroup() {
@@ -57,7 +56,7 @@ public class LatticeRecipe extends LatticeObject {
 
     public static class AppendableBuilder<I extends LatticeRecipe, B extends AppendableBuilder<I, B>> extends LatticeBuilder.Advanced<I, B> {
         private RecipeCategory recipeCategory = RecipeCategory.MISC;
-        private Collection<Supplier<Item>> result = List.of();
+        private List<Supplier<Item>> result = List.of();
         private int resultCount = 1;
         private String unlockId = "unlock_by";
         private Supplier<Item> unlockItem = () -> Items.STONE;
@@ -93,7 +92,7 @@ public class LatticeRecipe extends LatticeObject {
             return this.result(List.of(itemSupplier));
         }
 
-        public B result(@NotNull Collection<Supplier<Item>> items) {
+        public B result(@NotNull List<Supplier<Item>> items) {
             this.result = items;
 
             return this.self();

@@ -1,4 +1,4 @@
-package net.ethyl.lattice_api.core.instances;
+package net.ethyl.lattice_api.core.instances.other;
 
 import net.ethyl.lattice_api.core.data.LatticeFXManager;
 import net.neoforged.neoforge.common.NeoForge;

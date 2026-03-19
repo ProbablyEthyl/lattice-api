@@ -1,6 +1,6 @@
 package net.ethyl.lattice_api.core.content.items.items;
 
-import net.ethyl.lattice_api.core.utils.CoreUtils;
+import net.ethyl.lattice_api.core.utils.utility.CoreUtils;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.ethyl.lattice_api.modules.common.items.items.LatticeFoodItem;
 import net.minecraft.network.chat.Component;

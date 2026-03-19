@@ -1,6 +1,6 @@
 package net.ethyl.lattice_api.modules.common.RecipeTypes;
 
-import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.instances.objects.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeBlock;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.minecraft.world.item.Item;
@@ -74,11 +74,11 @@ public class LatticeShapedDyeRecipe extends LatticeShapedRecipe {
         }
 
         @Override
-        public B define(char character, @NotNull Collection<Supplier<Item>> items) {
+        public B define(char character, @NotNull List<Supplier<Item>> items) {
             return this.define(character, items, false);
         }
 
-        public B define(char character, @NotNull Collection<Supplier<Item>> items, boolean isDyeable) {
+        public B define(char character, @NotNull List<Supplier<Item>> items, boolean isDyeable) {
             if (isDyeable) {
                 this.dyeables.add(character);
             } else {

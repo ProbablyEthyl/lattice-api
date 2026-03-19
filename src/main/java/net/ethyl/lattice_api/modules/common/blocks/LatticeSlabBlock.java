@@ -1,17 +1,16 @@
 package net.ethyl.lattice_api.modules.common.blocks;
 
 import net.ethyl.lattice_api.core.content.blocks.BasicSlab;
-import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.instances.objects.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeBlock;
-import net.minecraft.world.level.block.SlabBlock;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
-public class LatticeSlabBlock extends LatticeBlock<SlabBlock> {
-    protected LatticeSlabBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<SlabBlock> deferredBlock, @NotNull AppendableBuilder<? extends LatticeBlock<SlabBlock>, ?> builder) {
+public class LatticeSlabBlock extends LatticeBlock<BasicSlab> {
+    protected LatticeSlabBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<BasicSlab> deferredBlock, @NotNull AppendableBuilder<? extends LatticeSlabBlock, ?> builder) {
         super(registryId, deferredBlock, builder);
     }
 
@@ -19,8 +18,8 @@ public class LatticeSlabBlock extends LatticeBlock<SlabBlock> {
         return new AppendableBuilder<>(LatticeSlabBlock::new, BasicSlab::new);
     }
 
-    public static class AppendableBuilder<I extends LatticeBlock<SlabBlock>, B extends AppendableBuilder<I, B>> extends LatticeBlock.AppendableBuilder<SlabBlock, I, B> {
-        protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredBlock<SlabBlock>, B, I> latticeFactory, @NotNull Function<B, SlabBlock> blockFactory) {
+    public static class AppendableBuilder<I extends LatticeSlabBlock, B extends AppendableBuilder<I, B>> extends LatticeBlock.AppendableBuilder<BasicSlab, I, B> {
+        protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredBlock<BasicSlab>, B, I> latticeFactory, @NotNull Function<B, BasicSlab> blockFactory) {
             super(latticeFactory, blockFactory);
         }
     }

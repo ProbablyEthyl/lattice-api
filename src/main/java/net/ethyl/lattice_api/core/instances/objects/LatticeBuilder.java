@@ -1,4 +1,4 @@
-package net.ethyl.lattice_api.core.instances;
+package net.ethyl.lattice_api.core.instances.objects;
 
 import net.ethyl.lattice_api.modules.base.LatticeObject;
 import org.apache.commons.lang3.function.TriFunction;
@@ -48,8 +48,8 @@ public abstract class LatticeBuilder<F, A, I extends LatticeObject, B extends La
         }
     }
 
-    public static class Complex<I extends LatticeObject, A, B extends Complex<I, A, B>> extends LatticeBuilder<TriFunction<RegistryId, A, B, I>, A, I, B> {
-        protected Complex(@NotNull TriFunction<RegistryId, A, B, I> latticeFactory) {
+    public static class Complex<I extends LatticeObject, A, B extends Complex<I, A, B>> extends LatticeBuilder<TriFunction<RegistryId, A, B, ? extends I>, A, I, B> {
+        protected Complex(@NotNull TriFunction<RegistryId, A, B, ? extends I> latticeFactory) {
             super(latticeFactory);
         }
 

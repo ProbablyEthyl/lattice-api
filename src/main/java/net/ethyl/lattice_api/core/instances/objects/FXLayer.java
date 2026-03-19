@@ -1,6 +1,6 @@
-package net.ethyl.lattice_api.core.instances;
+package net.ethyl.lattice_api.core.instances.objects;
 
-import net.ethyl.lattice_api.core.utils.FXUtils;
+import net.ethyl.lattice_api.core.utils.utility.FXUtils;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;

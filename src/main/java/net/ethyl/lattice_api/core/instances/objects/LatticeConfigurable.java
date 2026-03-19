@@ -1,6 +1,5 @@
-package net.ethyl.lattice_api.core.instances;
+package net.ethyl.lattice_api.core.instances.objects;
 
-import net.ethyl.lattice_api.core.utils.CoreUtils;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.jetbrains.annotations.NotNull;
 

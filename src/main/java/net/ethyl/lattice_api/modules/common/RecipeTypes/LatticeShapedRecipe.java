@@ -1,6 +1,6 @@
 package net.ethyl.lattice_api.modules.common.RecipeTypes;
 
-import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.instances.objects.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeBlock;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.ethyl.lattice_api.modules.base.LatticeRecipe;
@@ -10,7 +10,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +18,7 @@ import java.util.function.Supplier;
 
 public class LatticeShapedRecipe extends LatticeRecipe {
     private final Map<Integer, String> recipePattern;
-    private final Map<Character, Collection<Supplier<Item>>> recipeDefiner;
+    private final Map<Character, List<Supplier<Item>>> recipeDefiner;
     private final Map<Character, TagKey<Item>> recipeDefinerTags;
 
     protected LatticeShapedRecipe(@NotNull RegistryId registryId, @NotNull AppendableBuilder<? extends LatticeRecipe, ?> builder) {
@@ -33,7 +32,7 @@ public class LatticeShapedRecipe extends LatticeRecipe {
         return this.recipePattern;
     }
 
-    public Map<Character, Collection<Supplier<Item>>> getDefined() {
+    public Map<Character, List<Supplier<Item>>> getDefined() {
         return this.recipeDefiner;
     }
 
@@ -47,7 +46,7 @@ public class LatticeShapedRecipe extends LatticeRecipe {
 
     public static class AppendableBuilder<I extends LatticeShapedRecipe, B extends AppendableBuilder<I, B>> extends LatticeRecipe.AppendableBuilder<I, B> {
         private final Map<Integer, String> recipePattern = new HashMap<>();
-        private final Map<Character, Collection<Supplier<Item>>> recipeDefiner = new HashMap<>();
+        private final Map<Character, List<Supplier<Item>>> recipeDefiner = new HashMap<>();
         private final Map<Character, TagKey<Item>> recipeDefinerTags = new HashMap<>();
 
         protected int currentRow = 0;
@@ -113,7 +112,7 @@ public class LatticeShapedRecipe extends LatticeRecipe {
             return this.self();
         }
 
-        public B define(char character, @NotNull Collection<Supplier<Item>> items) {
+        public B define(char character, @NotNull List<Supplier<Item>> items) {
             this.recipeDefiner.put(character, items);
 
             return this.self();

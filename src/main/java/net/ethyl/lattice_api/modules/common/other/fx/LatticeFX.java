@@ -1,9 +1,9 @@
 package net.ethyl.lattice_api.modules.common.other.fx;
 
-import net.ethyl.lattice_api.core.instances.FXLayer;
-import net.ethyl.lattice_api.core.instances.LatticeBuilder;
-import net.ethyl.lattice_api.core.instances.RegistryId;
-import net.ethyl.lattice_api.core.utils.FXUtils;
+import net.ethyl.lattice_api.core.instances.objects.FXLayer;
+import net.ethyl.lattice_api.core.instances.objects.LatticeBuilder;
+import net.ethyl.lattice_api.core.instances.objects.RegistryId;
+import net.ethyl.lattice_api.core.utils.utility.FXUtils;
 import net.ethyl.lattice_api.modules.base.LatticeObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;

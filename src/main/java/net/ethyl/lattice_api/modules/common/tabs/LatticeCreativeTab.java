@@ -1,7 +1,7 @@
 package net.ethyl.lattice_api.modules.common.tabs;
 
-import net.ethyl.lattice_api.core.instances.LatticeBuilder;
-import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.instances.objects.LatticeBuilder;
+import net.ethyl.lattice_api.core.instances.objects.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeBlock;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.ethyl.lattice_api.modules.base.LatticeObject;

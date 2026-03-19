@@ -1,8 +1,11 @@
-package net.ethyl.lattice_api.core.instances;
+package net.ethyl.lattice_api.core.instances.objects;
 
-import net.ethyl.lattice_api.core.utils.CoreUtils;
-import net.ethyl.lattice_api.core.utils.ErrUtils;
+import net.ethyl.lattice_api.core.utils.utility.CoreUtils;
+import net.ethyl.lattice_api.core.utils.utility.ErrUtils;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.NotNull;
 
 public class RegistryId {
@@ -37,5 +40,17 @@ public class RegistryId {
 
     public static RegistryId create(@NotNull String namespace, @NotNull String path) {
         return new RegistryId(namespace, path);
+    }
+
+    public static RegistryId create(@NotNull Item item) {
+        return create(BuiltInRegistries.ITEM.getKey(item));
+    }
+
+    public static RegistryId create(@NotNull ResourceKey<?> resourceKey) {
+        return create(resourceKey.location());
+    }
+
+    public static RegistryId create(@NotNull ResourceLocation resourceLocation) {
+        return new RegistryId(resourceLocation.getNamespace(), resourceLocation.getPath());
     }
 }

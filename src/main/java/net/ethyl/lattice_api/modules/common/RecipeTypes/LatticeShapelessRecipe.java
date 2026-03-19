@@ -1,6 +1,6 @@
 package net.ethyl.lattice_api.modules.common.RecipeTypes;
 
-import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.instances.objects.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeBlock;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.ethyl.lattice_api.modules.base.LatticeRecipe;
@@ -15,7 +15,7 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class LatticeShapelessRecipe extends LatticeRecipe {
-    private final Map<Integer, Collection<Supplier<Item>>> recipeIngredients;
+    private final Map<Integer, List<Supplier<Item>>> recipeIngredients;
     private final Map<Integer, TagKey<Item>> recipeIngredientTags;
 
     protected LatticeShapelessRecipe(@NotNull RegistryId registryId, @NotNull AppendableBuilder<? extends LatticeRecipe, ?> builder) {
@@ -24,7 +24,7 @@ public class LatticeShapelessRecipe extends LatticeRecipe {
         this.recipeIngredientTags = builder.recipeIngredientTags;
     }
 
-    public Map<Integer, Collection<Supplier<Item>>> getIngredients() {
+    public Map<Integer, List<Supplier<Item>>> getIngredients() {
         return this.recipeIngredients;
     }
 
@@ -37,7 +37,7 @@ public class LatticeShapelessRecipe extends LatticeRecipe {
     }
 
     public static class AppendableBuilder<I extends LatticeShapelessRecipe, B extends AppendableBuilder<I, B>> extends LatticeRecipe.AppendableBuilder<I, B> {
-        private final Map<Integer, Collection<Supplier<Item>>> recipeIngredients = new HashMap<>();
+        private final Map<Integer, List<Supplier<Item>>> recipeIngredients = new HashMap<>();
         private final Map<Integer, TagKey<Item>> recipeIngredientTags = new HashMap<>();
 
         protected int ingredients = 0;
@@ -82,11 +82,11 @@ public class LatticeShapelessRecipe extends LatticeRecipe {
             return this.ingredient(List.of(itemSupplier), count);
         }
 
-        public B ingredient(@NotNull Collection<Supplier<Item>> items) {
+        public B ingredient(@NotNull List<Supplier<Item>> items) {
             return this.ingredient(items, 1);
         }
 
-        public B ingredient(@NotNull Collection<Supplier<Item>> items, int count) {
+        public B ingredient(@NotNull List<Supplier<Item>> items, int count) {
             for (int i = 0; i < count && this.ingredients < 9; i++) {
                 this.recipeIngredients.put(++this.ingredients, items);
             }

@@ -1,6 +1,6 @@
 package net.ethyl.lattice_api.modules.common.types.modelTypes;
 
-import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.instances.objects.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeType;
 import org.jetbrains.annotations.NotNull;
 

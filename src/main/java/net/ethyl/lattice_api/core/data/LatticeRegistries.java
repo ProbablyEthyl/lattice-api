@@ -1,27 +1,32 @@
 package net.ethyl.lattice_api.core.data;
 
-import net.ethyl.lattice_api.LatticeApi;
-import net.ethyl.lattice_api.core.instances.RegistryId;
-import net.ethyl.lattice_api.core.utils.RegistryUtils;
+import net.ethyl.lattice_api.core.instances.objects.RegistryId;
+import net.ethyl.lattice_api.core.utils.utility.RegistryUtils;
 import net.ethyl.lattice_api.modules.base.*;
 import net.ethyl.lattice_api.modules.common.items.equipment.tier.LatticeTier;
+import net.ethyl.lattice_api.modules.common.items.items.TransmutedItem;
 import net.ethyl.lattice_api.modules.common.other.fx.LatticeFX;
 import net.ethyl.lattice_api.modules.common.tabs.LatticeCreativeTab;
-import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeToolType;
-import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeBlockModelType;
-import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeItemModelType;
-import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeLootTable;
+import net.ethyl.lattice_api.modules.common.trims.TransmutedTrimMaterial;
+import net.ethyl.lattice_api.modules.common.trims.TransmutedTrimPattern;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.armortrim.TrimPattern;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Supplier;
 
 public class LatticeRegistries {
     private static final Collection<LatticeType> modelTypes = new LinkedList<>();
@@ -32,6 +37,10 @@ public class LatticeRegistries {
     private static final Collection<LatticeCreativeTab> tabs = new LinkedList<>();
     private static final Collection<LatticeTier> tiers = new LinkedList<>();
     private static final Collection<LatticeFX> fx = new LinkedList<>();
+    private static final Collection<LatticeBlockEntity<?, ?>> blockEntities = new LinkedList<>();
+    private static final Collection<LatticeArmorMaterial> armorMaterials = new LinkedList<>();
+    private static final Collection<LatticeTrimMaterial> trimMaterials = new LinkedList<>();
+    private static final Collection<LatticeTrimPattern> trimPatterns = new LinkedList<>();
 
     public static Types createTypes(@NotNull String modId) {
         return new Types(modId);
@@ -43,6 +52,10 @@ public class LatticeRegistries {
 
     public static Recipes createRecipes(@NotNull String modId) {
         return new Recipes(modId);
+    }
+
+    public static void transmute(@NotNull TransmutedItem transmutedItem) {
+        transmute(items, transmutedItem);
     }
 
     public static Items createItems(@NotNull String modId) {
@@ -65,48 +78,31 @@ public class LatticeRegistries {
         return new FX(modId);
     }
 
+    public static BlockEntities createBlockEntities(@NotNull String modId) {
+        return new BlockEntities(modId);
+    }
+
+    public static ArmorMaterials createArmorMaterials(@NotNull String modId) {
+        return new ArmorMaterials(modId);
+    }
+
+    public static void transmute(@NotNull TransmutedTrimPattern transmutedTrimPattern) {
+        transmute(trimPatterns, transmutedTrimPattern);
+    }
+
+    public static TrimMaterials createTrimMaterials(@NotNull String modId) {
+        return new TrimMaterials(modId);
+    }
+
+    public static void transmute(@NotNull TransmutedTrimMaterial transmutedTrimMaterial) {
+        transmute(trimMaterials, transmutedTrimMaterial);
+    }
+
+    public static TrimPatterns createTrimPatterns(@NotNull String modId) {
+        return new TrimPatterns(modId);
+    }
+
     public static class Types extends LatticeRegistry<LatticeType> {
-        private static final Types BUILT_IN = createTypes(LatticeApi.MOD_ID);
-
-        private static final LatticeItemModelType BASIC_ITEM = BUILT_IN.register("basic_item", LatticeItemModelType.builder());
-        private static final LatticeItemModelType HANDHELD_ITEM = BUILT_IN.register("handheld_item", LatticeItemModelType.builder());
-        private static final LatticeBlockModelType BASIC_BLOCK = BUILT_IN.register("basic_block", LatticeBlockModelType.builder());
-        private static final LatticeBlockModelType WITH_SIDES_BLOCK = BUILT_IN.register("with_sides_block", LatticeBlockModelType.builder());
-        private static final LatticeLootTable LOOT_DROP_SELF = BUILT_IN.register("loot_drop_self", LatticeLootTable.builder());
-        private static final LatticeLootTable LOOT_DROP_OTHER = BUILT_IN.register("loot_drop_other", LatticeLootTable.builder());
-        private static final LatticeLootTable LOOT_DROP_SILK_TOUCH = BUILT_IN.register("loot_drop_silk_touch", LatticeLootTable.builder());
-        private static final LatticeLootTable LOOT_DROP_AMOUNT = BUILT_IN.register("loot_drop_amount", LatticeLootTable.builder());
-        private static final LatticeLootTable LOOT_DROP_NONE = BUILT_IN.register("loot_drop_none", LatticeLootTable.builder());
-        private static final LatticeToolType TOOL_TYPE_PICKAXE = BUILT_IN.register("tool_type_pickaxe", LatticeToolType.builder());
-        private static final LatticeToolType TOOL_TYPE_AXE = BUILT_IN.register("tool_type_axe", LatticeToolType.builder());
-        private static final LatticeToolType TOOL_TYPE_SHOVEL = BUILT_IN.register("tool_type_shovel", LatticeToolType.builder());
-        private static final LatticeToolType TOOL_TYPE_HOE = BUILT_IN.register("tool_type_hoe", LatticeToolType.builder());
-
-        public static class Item {
-            public static final LatticeItemModelType BASIC = Types.BASIC_ITEM;
-            public static final LatticeItemModelType HANDHELD = Types.HANDHELD_ITEM;
-        }
-
-        public static class Block {
-            public static final LatticeBlockModelType BASIC = Types.BASIC_BLOCK;
-            public static final LatticeBlockModelType WITH_SIDES = Types.WITH_SIDES_BLOCK;
-        }
-
-        public static class LootTable {
-            public static final LatticeLootTable SELF = Types.LOOT_DROP_SELF;
-            public static final LatticeLootTable OTHER = Types.LOOT_DROP_OTHER;
-            public static final LatticeLootTable SILK_TOUCH = Types.LOOT_DROP_SILK_TOUCH;
-            public static final LatticeLootTable AMOUNT = Types.LOOT_DROP_AMOUNT;
-            public static final LatticeLootTable NONE = Types.LOOT_DROP_NONE;
-        }
-
-        public static class ToolType {
-            public static final LatticeToolType PICKAXE = Types.TOOL_TYPE_PICKAXE;
-            public static final LatticeToolType AXE = Types.TOOL_TYPE_AXE;
-            public static final LatticeToolType SHOVEL = Types.TOOL_TYPE_SHOVEL;
-            public static final LatticeToolType HOE = Types.TOOL_TYPE_HOE;
-        }
-
         private Types(@NotNull String modId) {
             super(modId);
         }
@@ -201,7 +197,7 @@ public class LatticeRegistries {
             this.BLOCK_ITEMS = DeferredRegister.createItems(modId);
         }
 
-        public <T extends Block, I extends LatticeBlock<T>> I register(@NotNull String id, @NotNull LatticeBlock.AppendableBuilder<T, I, ?> builder) {
+        public <T extends Block, I extends LatticeBlock<T>> I register(@NotNull String id, @NotNull LatticeBlock.AppendableBuilder<T, ? extends I, ?> builder) {
             I latticeBlock = builder.build(createRegistryId(this, id), this.BLOCKS.register(id, builder::generate));
             this.BLOCK_ITEMS.register(id, () -> new BlockItem(latticeBlock.get(), builder.getBlockItemProperties()));
             this.registryContent.add(latticeBlock);
@@ -253,8 +249,7 @@ public class LatticeRegistries {
         }
 
         public <I extends LatticeTier> I register(@NotNull String id, @NotNull LatticeTier.AppendableBuilder<I, ?> builder) {
-            RegistryId registryId = createRegistryId(this, id);
-            I latticeTier = builder.build(registryId, null);
+            I latticeTier = builder.build(createRegistryId(this, id), null);
             this.registryContent.add(latticeTier);
 
             return latticeTier;
@@ -273,9 +268,8 @@ public class LatticeRegistries {
             super(modId);
         }
 
-        public<I extends LatticeFX> I register(@NotNull String id, @NotNull LatticeFX.AppendableBuilder<I, ?> builder) {
-            RegistryId registryId = createRegistryId(this, id);
-            I latticeFX = builder.build(registryId, null);
+        public <I extends LatticeFX> I register(@NotNull String id, @NotNull LatticeFX.AppendableBuilder<I, ?> builder) {
+            I latticeFX = builder.build(createRegistryId(this, id), null);
             this.registryContent.add(latticeFX);
 
             return latticeFX;
@@ -286,6 +280,145 @@ public class LatticeRegistries {
             this.registryContent.forEach(latticeFX -> checkDuplicate(fx, latticeFX.getRegistryId()));
 
             fx.addAll(this.registryContent);
+        }
+    }
+
+    public static class BlockEntities extends LatticeRegistry<LatticeBlockEntity<?, ?>> {
+        private final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES;
+        private final DeferredRegister.Blocks BLOCKS;
+        private final DeferredRegister.Items BLOCK_ITEMS;
+
+        protected BlockEntities(@NotNull String modId) {
+            super(modId);
+            this.BLOCK_ENTITY_TYPES = DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, modId);
+            this.BLOCKS = DeferredRegister.createBlocks(modId);
+            this.BLOCK_ITEMS = DeferredRegister.createItems(modId);
+        }
+
+        @SuppressWarnings("DataFlowIssue")
+        public <T extends Block, BE extends BlockEntity, I extends LatticeBlockEntity<T, BE>> I register(@NotNull String id, LatticeBlockEntity.AppendableBuilder<T, BE, I, ?, ?> builder) {
+            DeferredBlock<T> deferredBlock = BLOCKS.register(id, builder::generate);
+            I latticeBlockEntity = builder.build(createRegistryId(this, id), deferredBlock);
+
+            Supplier<BlockEntityType<BE>> blockEntityType = BLOCK_ENTITY_TYPES.register(id + "_block_entity",
+                    () -> BlockEntityType.Builder.of(
+                            (pos, state) -> {
+                                try {
+                                    return builder.buildBlockEntity(pos, state);
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
+                            },
+                            latticeBlockEntity.get()
+                    ).build(null)
+            );
+
+            latticeBlockEntity.setType(blockEntityType);
+            builder.type(blockEntityType);
+            this.BLOCK_ITEMS.register(id, () -> new BlockItem(deferredBlock.get(), builder.getBlockBuilder().getBlockItemProperties()));
+            this.registryContent.add(latticeBlockEntity);
+
+            return latticeBlockEntity;
+        }
+
+        @Override
+        public void register(@NotNull IEventBus modEventBus) {
+            this.registryContent.forEach(latticeBlockEntity -> {
+                checkDuplicate(blockEntities, latticeBlockEntity.getRegistryId());
+                checkDuplicate(blocks, latticeBlockEntity.getRegistryId());
+                checkDuplicate(items, latticeBlockEntity.getRegistryId());
+            });
+
+            this.BLOCK_ENTITY_TYPES.register(modEventBus);
+            this.BLOCKS.register(modEventBus);
+            this.BLOCK_ITEMS.register(modEventBus);
+            blockEntities.addAll(this.registryContent);
+            blocks.addAll(this.registryContent);
+        }
+    }
+
+    public static class ArmorMaterials extends LatticeRegistry<LatticeArmorMaterial> {
+        private final DeferredRegister<ArmorMaterial> ARMOR_MATERIALS;
+
+        protected ArmorMaterials(@NotNull String modId) {
+            super(modId);
+            this.ARMOR_MATERIALS = DeferredRegister.create(BuiltInRegistries.ARMOR_MATERIAL, modId);
+        }
+
+        public <I extends LatticeArmorMaterial> I register(@NotNull String id, @NotNull LatticeArmorMaterial.AppendableBuilder<I, ?> builder) {
+            RegistryId registryId = createRegistryId(this, id);
+            ResourceLocation resourceLocation = registryId.toResourceLoc();
+            I latticeArmorType = builder.build(registryId, this.ARMOR_MATERIALS.register(id, () ->
+                    new ArmorMaterial(
+                            builder.getTypeProtection(),
+                            builder.getEnchantmentValue(),
+                            builder.getEquipSound(),
+                            builder.getRepairIngredient(),
+                            List.of(new ArmorMaterial.Layer(resourceLocation)),
+                            builder.getToughness(),
+                            builder.getKnockbackResistance()
+                    )
+
+            ));
+            this.registryContent.add(latticeArmorType);
+
+            return latticeArmorType;
+        }
+
+        @Override
+        public void register(@NotNull IEventBus modEventBus) {
+            this.registryContent.forEach(latticeArmorMaterial -> checkDuplicate(armorMaterials, latticeArmorMaterial.getRegistryId()));
+
+            this.ARMOR_MATERIALS.register(modEventBus);
+            armorMaterials.addAll(this.registryContent);
+        }
+    }
+
+    public static class TrimMaterials extends LatticeRegistry<LatticeTrimMaterial> {
+        protected TrimMaterials(@NotNull String modId) {
+            super(modId);
+        }
+
+        public <I extends LatticeTrimMaterial> I register(@NotNull String id, @NotNull LatticeTrimMaterial.AppendableBuilder<I, ?> builder) {
+            RegistryId registryId = createRegistryId(this, id);
+            I latticeTrimMaterial = builder.build(registryId, ResourceKey.create(Registries.TRIM_MATERIAL, registryId.toResourceLoc()));
+            this.registryContent.add(latticeTrimMaterial);
+
+            return latticeTrimMaterial;
+        }
+
+        @Override
+        public void register(@NotNull IEventBus modEventBus) {
+            this.registryContent.forEach(latticeTrimMaterial -> checkDuplicate(trimMaterials, latticeTrimMaterial.getRegistryId()));
+
+            trimMaterials.addAll(this.registryContent);
+        }
+    }
+
+    public static class TrimPatterns extends LatticeRegistry<LatticeTrimPattern> {
+        private final DeferredRegister.Items SMITHING_TEMPLATES;
+
+        protected TrimPatterns(@NotNull String modId) {
+            super(modId);
+            this.SMITHING_TEMPLATES = DeferredRegister.createItems(modId);
+        }
+
+        public <I extends LatticeTrimPattern> I register(@NotNull String id, @NotNull LatticeTrimPattern.AppendableBuilder<I, ?> builder) {
+            RegistryId registryId = createRegistryId(this, id);
+            ResourceKey<TrimPattern> resourceKey = ResourceKey.create(Registries.TRIM_PATTERN, registryId.toResourceLoc());
+            builder.setTrimItem(SMITHING_TEMPLATES.register(id + "_armor_trim_smithing_template", () -> SmithingTemplateItem.createArmorTrimTemplate(resourceKey)));
+            I latticeTrimPattern = builder.build(registryId, resourceKey);
+            this.registryContent.add(latticeTrimPattern);
+
+            return latticeTrimPattern;
+        }
+
+        @Override
+        public void register(@NotNull IEventBus modEventBus) {
+            this.registryContent.forEach(latticeTrimPattern -> checkDuplicate(trimPatterns, latticeTrimPattern.getRegistryId()));
+
+            this.SMITHING_TEMPLATES.register(modEventBus);
+            trimPatterns.addAll(this.registryContent);
         }
     }
 
@@ -321,6 +454,27 @@ public class LatticeRegistries {
         return new LinkedList<>(fx);
     }
 
+    public static Collection<LatticeBlockEntity<?, ?>> getBlockEntities() {
+        return new LinkedList<>(blockEntities);
+    }
+
+    public static Collection<LatticeArmorMaterial> getArmorMaterials() {
+        return new LinkedList<>(armorMaterials);
+    }
+
+    public static Collection<LatticeTrimMaterial> getTrimMaterials() {
+        return new LinkedList<>(trimMaterials);
+    }
+
+    public static Collection<LatticeTrimPattern> getTrimPatterns() {
+        return new LinkedList<>(trimPatterns);
+    }
+
+    private static <T extends LatticeObject> void transmute(@NotNull Collection<T> collection, @NotNull T transmutable) {
+        checkDuplicate(collection, transmutable.getRegistryId());
+        collection.add(transmutable);
+    }
+
     public static <R extends LatticeRegistry<? extends LatticeObject>> RegistryId createRegistryId(@NotNull R registry, @NotNull String path) {
         RegistryId registryId = RegistryId.create(registry.modId, path);
         checkDuplicate(registry.registryContent, registryId);
@@ -330,9 +484,5 @@ public class LatticeRegistries {
 
     public static void checkDuplicate(@NotNull Collection<? extends LatticeObject> collection, @NotNull RegistryId registryId) {
         RegistryUtils.checkDuplicate(collection, registryId);
-    }
-
-    public static void register(@NotNull IEventBus modEventBus) {
-        Types.BUILT_IN.register(modEventBus);
     }
 }

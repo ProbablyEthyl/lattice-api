@@ -1,8 +1,8 @@
 package net.ethyl.lattice_api.modules.base;
 
-import net.ethyl.lattice_api.core.instances.LatticeConfigurable;
-import net.ethyl.lattice_api.core.utils.CoreUtils;
-import net.ethyl.lattice_api.core.utils.ErrUtils;
+import net.ethyl.lattice_api.core.instances.objects.LatticeConfigurable;
+import net.ethyl.lattice_api.core.utils.utility.CoreUtils;
+import net.ethyl.lattice_api.core.utils.utility.ErrUtils;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.jetbrains.annotations.NotNull;

@@ -1,38 +1,44 @@
 package net.ethyl.lattice_api.modules.base;
 
-import net.ethyl.lattice_api.core.data.LatticeRegistries;
-import net.ethyl.lattice_api.core.instances.LatticeBuilder;
-import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.instances.objects.LatticeBuilder;
+import net.ethyl.lattice_api.core.instances.objects.RegistryId;
+import net.ethyl.lattice_api.mod.registries.LatticeTypes;
 import net.ethyl.lattice_api.modules.common.items.equipment.tier.LatticeTier;
+import net.ethyl.lattice_api.modules.common.items.items.TransmutedItem;
 import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeItemModelType;
+import net.minecraft.core.Holder;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
-import net.neoforged.neoforge.registries.DeferredItem;
 import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class LatticeItem<T extends Item> extends LatticeObject {
-    protected final DeferredItem<T> deferredItem;
+    protected final Supplier<T> supplierItem;
     protected final LatticeItemModelType modelType;
     protected final Item.Properties itemProperties;
     protected final boolean hasDescription;
 
-    protected LatticeItem(@NotNull RegistryId registryId, @NotNull DeferredItem<T> deferredItem, @NotNull LatticeItem.AppendableBuilder<T, ? extends LatticeItem<T>, ?> builder) {
+    protected LatticeItem(@NotNull RegistryId registryId, @NotNull Supplier<T> supplierItem, @NotNull LatticeItem.AppendableBuilder<T, ? extends LatticeItem<T>, ?> builder) {
         super(registryId);
-        this.deferredItem = deferredItem;
+        this.supplierItem = supplierItem;
         this.modelType = builder.modelType;
         this.itemProperties = builder.itemProperties;
         this.hasDescription = builder.hasDescription;
     }
 
-    public DeferredItem<T> getDeferred() {
-        return this.deferredItem;
+    public boolean isTransmuted() {
+        return this instanceof TransmutedItem;
+    }
+
+    public Supplier<T> getSupplier() {
+        return this.supplierItem;
     }
 
     public T get() {
-        return this.getDeferred().get();
+        return this.getSupplier().get();
     }
 
     public LatticeItemModelType getModelType() {
@@ -47,14 +53,14 @@ public class LatticeItem<T extends Item> extends LatticeObject {
         return this.hasDescription;
     }
 
-    public static class AppendableBuilder<T extends Item, I extends LatticeItem<T>, B extends AppendableBuilder<T, I, B>> extends LatticeBuilder.Complex<I, DeferredItem<T>, B> {
+    public static class AppendableBuilder<T extends Item, I extends LatticeItem<T>, B extends AppendableBuilder<T, I, B>> extends LatticeBuilder.Complex<I, Supplier<T>, B> {
         private final Function<B, T> itemFactory;
 
-        protected LatticeItemModelType modelType = LatticeRegistries.Types.Item.BASIC;
+        protected LatticeItemModelType modelType = LatticeTypes.Item.BASIC;
         protected Item.Properties itemProperties = new Item.Properties().stacksTo(64);
         private boolean hasDescription = false;
 
-        protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredItem<T>, B, I> latticeFactory, @NotNull Function<B, T> itemFactory) {
+        protected AppendableBuilder(@NotNull TriFunction<RegistryId, Supplier<T>, B, I> latticeFactory, @NotNull Function<B, T> itemFactory) {
             super(latticeFactory);
             this.itemFactory = itemFactory;
         }
@@ -114,9 +120,9 @@ public class LatticeItem<T extends Item> extends LatticeObject {
         public static class Tool<T extends TieredItem, I extends LatticeItem<T>, B extends Tool<T, I, B>> extends AppendableBuilder<T, I, B> {
             protected Tier tier = Tiers.DIAMOND;
 
-            protected Tool(@NotNull TriFunction<RegistryId, DeferredItem<T>, B, I> latticeFactory, @NotNull Function<B, T> itemFactory) {
+            protected Tool(@NotNull TriFunction<RegistryId, Supplier<T>, B, I> latticeFactory, @NotNull Function<B, T> itemFactory) {
                 super(latticeFactory, itemFactory);
-                this.modelType(LatticeRegistries.Types.Item.HANDHELD);
+                this.modelType(LatticeTypes.Item.HANDHELD);
             }
 
             public B attribute(@NotNull ItemAttributeModifiers itemAttributeModifiers) {
@@ -135,6 +141,30 @@ public class LatticeItem<T extends Item> extends LatticeObject {
 
             public B tier(@NotNull Tier tier) {
                 this.tier = tier;
+
+                return this.self();
+            }
+        }
+
+        public static class Armor<T extends ArmorItem, I extends LatticeItem<T>, B extends Armor<T, I, B>> extends AppendableBuilder<T, I, B> {
+            private Holder<ArmorMaterial> armorMaterial = ArmorMaterials.DIAMOND;
+
+            protected Armor(@NotNull TriFunction<RegistryId, Supplier<T>, B, I> latticeFactory, @NotNull Function<B, T> itemFactory) {
+                super(latticeFactory, itemFactory);
+            }
+
+            protected B durabilityFactor(@NotNull ArmorItem.Type armorType, int durabilityFactor) {
+                this.itemProperties.durability(armorType.getDurability(durabilityFactor));
+
+                return this.self();
+            }
+
+            public Holder<ArmorMaterial> getArmorMaterial() {
+                return this.armorMaterial;
+            }
+
+            public B armorMaterial(@NotNull Holder<ArmorMaterial> armorMaterial) {
+                this.armorMaterial = armorMaterial;
 
                 return this.self();
             }

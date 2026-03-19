@@ -1,4 +1,4 @@
-package net.ethyl.lattice_api.core.utils;
+package net.ethyl.lattice_api.core.utils.utility;
 
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
@@ -35,8 +35,6 @@ public class FXUtils {
 
     public static EntityHitResult rayCastEntity(@NotNull ServerLevel serverLevel, @NotNull LivingEntity livingEntity, @NotNull Vec3 pos, @NotNull Vec3 direction, double step, double inflation, @NotNull Predicate<Entity> filter) {
         direction = direction.scale(step);
-
-        List<Entity> hits = serverLevel.getEntities(livingEntity, new AABB(pos, pos.add(direction)).inflate(inflation), entity -> entity != livingEntity);
 
         return ProjectileUtil.getEntityHitResult(serverLevel, livingEntity, pos, pos.add(direction), new AABB(pos, pos.add(direction)).inflate(inflation), filter);
     }

@@ -1,8 +1,8 @@
 package net.ethyl.lattice_api.modules.base;
 
-import net.ethyl.lattice_api.core.data.LatticeRegistries;
-import net.ethyl.lattice_api.core.instances.LatticeBuilder;
-import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.instances.objects.LatticeBuilder;
+import net.ethyl.lattice_api.core.instances.objects.RegistryId;
+import net.ethyl.lattice_api.mod.registries.LatticeTypes;
 import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeToolType;
 import net.ethyl.lattice_api.modules.common.types.modelTypes.LatticeBlockModelType;
 import net.ethyl.lattice_api.modules.common.types.lootTypes.LatticeLootTable;
@@ -11,6 +11,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +30,7 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
     protected final Item.Properties blockItemProperties;
     protected final Supplier<Block> defaultBlock;
 
-    protected LatticeBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<T> deferredBlock, @NotNull AppendableBuilder<T, ? extends LatticeBlock<T>, ?> builder) {
+    protected LatticeBlock(@NotNull RegistryId registryId, @NotNull DeferredBlock<T> deferredBlock, @NotNull AppendableBuilder<? extends T, ? extends LatticeBlock<T>, ?> builder) {
         super(registryId);
         this.deferredBlock = deferredBlock;
         this.modelType = builder.modelType;
@@ -82,13 +84,16 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
 
     public static class AppendableBuilder<T extends Block, I extends LatticeBlock<T>, B extends AppendableBuilder<T, I, B>> extends LatticeBuilder.Complex<I, DeferredBlock<T>, B> {
         private final Function<B, T> blockFactory;
-
-        protected LatticeBlockModelType modelType = LatticeRegistries.Types.Block.BASIC;
-        protected LatticeLootTable lootType = LatticeRegistries.Types.LootTable.SELF;
-        protected LatticeToolType toolType = LatticeRegistries.Types.ToolType.PICKAXE;
+        protected LatticeBlockModelType modelType = LatticeTypes.Block.BASIC;
+        protected LatticeLootTable lootType = LatticeTypes.LootTable.SELF;
+        protected LatticeToolType toolType = LatticeTypes.ToolType.PICKAXE;
         private boolean hasDescription = false;
         protected BlockBehaviour.Properties blockProperties = BlockBehaviour.Properties.of().strength(1f);
+        protected float burnChance = 0.0f;
+        protected int spreadSpeed = 0;
+        protected boolean isFlammable = false;
         protected Item.Properties blockItemProperties = new Item.Properties().stacksTo(64);
+        protected VoxelShape voxelShape = Shapes.block();
         protected Supplier<Block> defaultBlock = () -> Blocks.STONE;
 
         protected AppendableBuilder(@NotNull TriFunction<RegistryId, DeferredBlock<T>, B, I> latticeFactory, @NotNull Function<B, T> blockFactory) {
@@ -107,7 +112,7 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
         }
 
         public B lootType(@NotNull LatticeLootTable lootType) {
-            if (lootType == LatticeRegistries.Types.LootTable.NONE) {
+            if (lootType == LatticeTypes.LootTable.NONE) {
                 this.blockProperties.noLootTable();
 
                 return this.self();
@@ -129,7 +134,7 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
         }
 
         private B lootType(@NotNull Supplier<Item> itemSupplier) {
-            return this.lootType(LatticeRegistries.Types.LootTable.OTHER, itemSupplier, 1f, 1f);
+            return this.lootType(LatticeTypes.LootTable.OTHER, itemSupplier, 1f, 1f);
         }
 
         public B lootType(@NotNull LatticeItem<?> latticeItem, float minDrops, float maxDrops) {
@@ -145,7 +150,7 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
         }
 
         private B lootType(@NotNull Supplier<Item> itemSupplier, float minDrops, float maxDrops) {
-            return this.lootType(LatticeRegistries.Types.LootTable.AMOUNT, itemSupplier, minDrops, maxDrops);
+            return this.lootType(LatticeTypes.LootTable.AMOUNT, itemSupplier, minDrops, maxDrops);
         }
 
         public B lootType(@NotNull LatticeLootTable lootType, @NotNull Supplier<Item> itemSupplier, float minDrops, float maxDrops) {
@@ -193,9 +198,31 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
         }
 
         public B canIgnite() {
+            return this.canIgnite(50.0f, 50);
+        }
+
+        public B canIgnite(float burnChance) {
+            return this.canIgnite(burnChance, 50);
+        }
+
+        public B canIgnite(int spreadSpeed) {
+            return this.canIgnite(50.0f, spreadSpeed);
+        }
+
+        public B canIgnite(float burnChance, int spreadSpeed) {
             this.blockProperties.ignitedByLava();
+            this.burnChance = Math.max(burnChance, 100.0f);
+            this.spreadSpeed = Math.max(spreadSpeed, 100);
 
             return this.self();
+        }
+
+        public float getBurnChance() {
+            return this.burnChance;
+        }
+
+        public int getSpreadSpeed() {
+            return this.spreadSpeed;
         }
 
         public B requiresCorrectTool() {
@@ -212,6 +239,12 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
 
         public B noOcclusion() {
             this.blockProperties.noOcclusion();
+
+            return this.self();
+        }
+
+        public B friction(float friction) {
+            this.blockProperties.friction(friction);
 
             return this.self();
         }
@@ -238,6 +271,20 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
             return this.self();
         }
 
+        public VoxelShape getVoxelShape() {
+            return voxelShape;
+        }
+
+        public B voxelShape(float x1, float z1, float x2, float z2) {
+            return this.voxelShape(x1, 0.0f, z1, x2, 16.0f, z2);
+        }
+
+        public B voxelShape(float x1, float y1, float z1, float x2, float y2, float z2) {
+            this.voxelShape = Block.box(x1, y1, z1, x2, y2, z2);
+
+            return this.self();
+        }
+
         public Supplier<Block> getDefaultBlock() {
             return this.defaultBlock;
         }
@@ -253,13 +300,5 @@ public class LatticeBlock<T extends Block> extends LatticeObject {
 
             return this.self();
         }
-
-//        protected I build(@NotNull LatticeBlock<T> latticeBlock) {
-//            return this.build(latticeBlock.getRegistryId(), latticeBlock.getDeferred());
-//        }
-
-//        public I build(@NotNull RegistryId registryId, @NotNull DeferredBlock<T> deferredBlock) {
-//            return this.latticeFactory.apply(registryId, deferredBlock, this.self());
-//        }
     }
 }

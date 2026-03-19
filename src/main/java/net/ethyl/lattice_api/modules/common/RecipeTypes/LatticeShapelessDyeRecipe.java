@@ -1,6 +1,6 @@
 package net.ethyl.lattice_api.modules.common.RecipeTypes;
 
-import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.instances.objects.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeBlock;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.ethyl.lattice_api.modules.base.LatticeRecipe;
@@ -114,15 +114,15 @@ public class LatticeShapelessDyeRecipe extends LatticeShapelessRecipe {
         }
 
         @Override
-        public B ingredient(@NotNull Collection<Supplier<Item>> items) {
+        public B ingredient(@NotNull List<Supplier<Item>> items) {
             return this.ingredient(items, false);
         }
 
-        public B ingredient(@NotNull Collection<Supplier<Item>> items, boolean isDyeable) {
+        public B ingredient(@NotNull List<Supplier<Item>> items, boolean isDyeable) {
             return this.ingredient(items, 1, isDyeable);
         }
 
-        public B ingredient(@NotNull Collection<Supplier<Item>> items, int count, boolean isDyeable) {
+        public B ingredient(@NotNull List<Supplier<Item>> items, int count, boolean isDyeable) {
             if (isDyeable) {
                 for (int i = 0; i < count && this.ingredients < 9; i++) {
                     this.dyeable.add(this.ingredients + i + 1);

@@ -1,6 +1,6 @@
 package net.ethyl.lattice_api.modules.common.RecipeTypes;
 
-import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.instances.objects.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeBlock;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.ethyl.lattice_api.modules.base.LatticeRecipe;
@@ -14,7 +14,7 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class LatticeCookingRecipe extends LatticeRecipe {
-    private final Map<Integer, Map<Collection<Supplier<Item>>, Float>> recipeIngredients;
+    private final Map<Integer, Map<List<Supplier<Item>>, Float>> recipeIngredients;
     private final Map<RecipeSerializer<?>, Integer> recipeSerializers;
 
     protected LatticeCookingRecipe(@NotNull RegistryId registryId, @NotNull AppendableBuilder<? extends LatticeCookingRecipe, ?> builder) {
@@ -23,7 +23,7 @@ public class LatticeCookingRecipe extends LatticeRecipe {
         this.recipeSerializers = builder.recipeSerializers;
     }
 
-    public Map<Integer, Map<Collection<Supplier<Item>>, Float>> getIngredients() {
+    public Map<Integer, Map<List<Supplier<Item>>, Float>> getIngredients() {
         return this.recipeIngredients;
     }
 
@@ -36,7 +36,7 @@ public class LatticeCookingRecipe extends LatticeRecipe {
     }
 
     public static class AppendableBuilder<I extends LatticeCookingRecipe, B extends AppendableBuilder<I, B>> extends LatticeRecipe.AppendableBuilder<I, B> {
-        private final Map<Integer, Map<Collection<Supplier<Item>>, Float>> recipeIngredients = new HashMap<>();
+        private final Map<Integer, Map<List<Supplier<Item>>, Float>> recipeIngredients = new HashMap<>();
         private final Map<RecipeSerializer<?>, Integer> recipeSerializers = new HashMap<>();
 
         private int ingredients = 0;
@@ -85,11 +85,11 @@ public class LatticeCookingRecipe extends LatticeRecipe {
             return this.ingredient(List.of(item), experience);
         }
 
-        public B ingredient(@NotNull Collection<Supplier<Item>> items) {
+        public B ingredient(@NotNull List<Supplier<Item>> items) {
             return this.ingredient(items, 0.0f);
         }
 
-        public B ingredient(@NotNull Collection<Supplier<Item>> items, float experience) {
+        public B ingredient(@NotNull List<Supplier<Item>> items, float experience) {
             this.recipeIngredients.put(this.ingredients++, Map.of(items, experience));
 
             return this.self();

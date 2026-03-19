@@ -1,6 +1,6 @@
 package net.ethyl.lattice_api.modules.common.tags;
 
-import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.instances.objects.RegistryId;
 import net.ethyl.lattice_api.modules.base.LatticeItem;
 import net.ethyl.lattice_api.modules.base.LatticeTag;
 import net.minecraft.resources.ResourceLocation;
@@ -14,7 +14,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class LatticeItemTag extends LatticeTag<Item> {
-    private LatticeItemTag(@NotNull RegistryId registryId, @NotNull TagKey<Item> tagKey, @NotNull AppendableBuilder<? extends LatticeTag<Item>, ?> builder) {
+    private LatticeItemTag(@NotNull RegistryId registryId, @NotNull TagKey<Item> tagKey, @NotNull AppendableBuilder<? extends LatticeItemTag, ?> builder) {
         super(registryId, tagKey, builder);
     }
 
@@ -22,7 +22,7 @@ public class LatticeItemTag extends LatticeTag<Item> {
         return new AppendableBuilder<>(LatticeItemTag::new, ItemTags::create);
     }
 
-    public static class AppendableBuilder<I extends LatticeTag<Item>, B extends AppendableBuilder<I, B>> extends LatticeTag.AppendableBuilder<Item, I, B> {
+    public static class AppendableBuilder<I extends LatticeItemTag, B extends AppendableBuilder<I, B>> extends LatticeTag.AppendableBuilder<Item, I, B> {
         protected AppendableBuilder(@NotNull TriFunction<RegistryId, TagKey<Item>, B, I> latticeFactory, @NotNull Function<ResourceLocation, TagKey<Item>> tagKeyFactory) {
             super(latticeFactory, tagKeyFactory);
         }

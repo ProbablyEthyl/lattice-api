@@ -1,7 +1,7 @@
 package net.ethyl.lattice_api.modules.base;
 
-import net.ethyl.lattice_api.core.instances.LatticeBuilder;
-import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.instances.objects.LatticeBuilder;
+import net.ethyl.lattice_api.core.instances.objects.RegistryId;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import org.apache.commons.lang3.function.TriFunction;

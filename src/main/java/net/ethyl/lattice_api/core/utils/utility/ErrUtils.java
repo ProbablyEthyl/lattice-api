@@ -1,6 +1,6 @@
-package net.ethyl.lattice_api.core.utils;
+package net.ethyl.lattice_api.core.utils.utility;
 
-import net.ethyl.lattice_api.core.instances.RegistryId;
+import net.ethyl.lattice_api.core.instances.objects.RegistryId;
 import org.jetbrains.annotations.NotNull;
 
 public class ErrUtils {

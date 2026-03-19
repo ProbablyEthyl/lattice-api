@@ -1,23 +1,39 @@
 package net.ethyl.lattice_api.core.content.blocks;
 
-import net.ethyl.lattice_api.core.utils.CoreUtils;
-import net.ethyl.lattice_api.modules.base.LatticeBlock;
+import net.ethyl.lattice_api.core.utils.utility.CoreUtils;
 import net.ethyl.lattice_api.modules.common.blocks.LatticeStairBlock;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public class BasicStair extends StairBlock {
     private final boolean hasDescription;
+    private final float burnChance;
+    private final int spreadSpeed;
+    private final VoxelShape voxelShape;
 
-    public BasicStair(@NotNull LatticeStairBlock.AppendableBuilder<? extends LatticeBlock<StairBlock>, ?> builder) {
+    public BasicStair(@NotNull LatticeStairBlock.AppendableBuilder<? extends LatticeStairBlock, ?> builder) {
         super(builder.getDefaultBlock().get().defaultBlockState(), builder.getBlockProperties());
         this.hasDescription = builder.getHasDescription();
+        this.burnChance = builder.getBurnChance();
+        this.spreadSpeed = builder.getSpreadSpeed();
+        this.voxelShape = builder.getVoxelShape();
+    }
+
+    @Override
+    protected @NotNull VoxelShape getShape(@NotNull BlockState blockState, @NotNull BlockGetter blockGetter, @NotNull BlockPos blockPos, @NotNull CollisionContext collisionContext) {
+        return this.voxelShape;
     }
 
     @Override
@@ -25,5 +41,20 @@ public class BasicStair extends StairBlock {
         if (this.hasDescription) CoreUtils.setBasicDescription(itemStack, tooltipComponents);
 
         super.appendHoverText(itemStack, tooltipContext, tooltipComponents, tooltipFlag);
+    }
+
+    @Override
+    public boolean isFlammable(@NotNull BlockState blockState, @NotNull BlockGetter blockGetter, @NotNull BlockPos blockPos, @NotNull Direction direction) {
+        return blockState.ignitedByLava();
+    }
+
+    @Override
+    public int getFlammability(@NotNull BlockState blockState, @NotNull BlockGetter blockGetter, @NotNull BlockPos blockPos, @NotNull Direction direction) {
+        return (int) (3 * this.burnChance);
+    }
+
+    @Override
+    public int getFireSpreadSpeed(@NotNull BlockState blockState, @NotNull BlockGetter blockGetter, @NotNull BlockPos blockPos, @NotNull Direction direction) {
+        return this.spreadSpeed;
     }
 }
