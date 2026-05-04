@@ -618,7 +618,6 @@ public class LatticeDataGen {
                     typeBuilder.texture("layer1", trimResourceLocation);
                 }
 
-
                 ItemModelBuilder builder = this.withExistingParent(modId + ":" + path, mcLoc("item/generated"))
                         .override()
                         .model(new ModelFile.UncheckedModelFile(trimNameResourceLocation.getNamespace() + ":item/" + trimNameResourceLocation.getPath()))

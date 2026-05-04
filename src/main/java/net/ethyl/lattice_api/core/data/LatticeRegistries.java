@@ -1,6 +1,7 @@
 package net.ethyl.lattice_api.core.data;
 
 import net.ethyl.lattice_api.core.instances.objects.RegistryId;
+import net.ethyl.lattice_api.core.utils.utility.ErrUtils;
 import net.ethyl.lattice_api.core.utils.utility.RegistryUtils;
 import net.ethyl.lattice_api.modules.base.*;
 import net.ethyl.lattice_api.modules.common.items.equipment.tier.LatticeTier;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class LatticeRegistries {
+    private static boolean FROZEN = false;
     private static final Collection<LatticeType> modelTypes = new LinkedList<>();
     private static final Collection<LatticeTag<?>> tags = new LinkedList<>();
     private static final Collection<LatticeRecipe> recipes = new LinkedList<>();
@@ -42,16 +44,24 @@ public class LatticeRegistries {
     private static final Collection<LatticeTrimMaterial> trimMaterials = new LinkedList<>();
     private static final Collection<LatticeTrimPattern> trimPatterns = new LinkedList<>();
 
+    public static void freeze() {
+        FROZEN = true;
+    }
+
+    public static boolean isFrozen() {
+        return FROZEN;
+    }
+
     public static Types createTypes(@NotNull String modId) {
         return new Types(modId);
     }
 
     public static Tags createTags(@NotNull String modId) {
-        return new Tags(modId);
+        return createRegistry(new Tags(modId));
     }
 
     public static Recipes createRecipes(@NotNull String modId) {
-        return new Recipes(modId);
+        return createRegistry(new Recipes(modId));
     }
 
     public static void transmute(@NotNull TransmutedItem transmutedItem) {
@@ -59,39 +69,40 @@ public class LatticeRegistries {
     }
 
     public static Items createItems(@NotNull String modId) {
-        return new Items(modId);
+        return createRegistry(new Items(modId));
     }
 
     public static Blocks createBlocks(@NotNull String modId) {
-        return new Blocks(modId);
+        return createRegistry(new Blocks(modId));
     }
 
     public static Tabs createTabs(@NotNull String modId) {
-        return new Tabs(modId);
+        return createRegistry(new Tabs(modId));
     }
 
     public static Tiers createTiers(@NotNull String modId) {
-        return new Tiers(modId);
+        return createRegistry(new Tiers(modId));
     }
 
     public static FX createFX(@NotNull String modId) {
-        return new FX(modId);
+        return createRegistry(new FX(modId));
     }
 
     public static BlockEntities createBlockEntities(@NotNull String modId) {
-        return new BlockEntities(modId);
+        return createRegistry(new BlockEntities(modId));
     }
 
     public static ArmorMaterials createArmorMaterials(@NotNull String modId) {
-        return new ArmorMaterials(modId);
+        return createRegistry(new ArmorMaterials(modId));
     }
+
 
     public static void transmute(@NotNull TransmutedTrimPattern transmutedTrimPattern) {
         transmute(trimPatterns, transmutedTrimPattern);
     }
 
     public static TrimMaterials createTrimMaterials(@NotNull String modId) {
-        return new TrimMaterials(modId);
+        return createRegistry(new TrimMaterials(modId));
     }
 
     public static void transmute(@NotNull TransmutedTrimMaterial transmutedTrimMaterial) {
@@ -108,6 +119,10 @@ public class LatticeRegistries {
         }
 
         public <I extends LatticeType> I register(@NotNull String id, @NotNull LatticeType.AppendableBuilder<I, ?> builder) {
+            if (isFrozen()) {
+                ErrUtils.isFrozenErr(this.modId);
+            }
+
             I latticeType = builder.build(createRegistryId(this, id), null);
             this.registryContent.add(latticeType);
 
@@ -128,6 +143,10 @@ public class LatticeRegistries {
         }
 
         public <T, I extends LatticeTag<T>> I register(@NotNull String id, @NotNull LatticeTag.AppendableBuilder<T, I, ?> builder) {
+            if (isFrozen()) {
+                ErrUtils.isFrozenErr(this.modId);
+            }
+
             RegistryId registryId = createRegistryId(this, id);
             I latticeTag = builder.build(registryId, builder.generate(registryId));
             this.registryContent.add(latticeTag);
@@ -137,6 +156,10 @@ public class LatticeRegistries {
 
         @Override
         public void register(@NotNull IEventBus modEventBus) {
+            if (isFrozen()) {
+                ErrUtils.isFrozenErr(this.modId);
+            }
+
             this.registryContent.forEach(latticeTag -> checkDuplicate(tags, latticeTag.getRegistryId()));
 
             tags.addAll(this.registryContent);
@@ -149,6 +172,10 @@ public class LatticeRegistries {
         }
 
         public <I extends LatticeRecipe> I register(@NotNull String id, @NotNull LatticeRecipe.AppendableBuilder<I, ?> builder) {
+            if (isFrozen()) {
+                ErrUtils.isFrozenErr(this.modId);
+            }
+
             I latticeRecipe = builder.build(createRegistryId(this, id), null);
             this.registryContent.add(latticeRecipe);
 
@@ -172,6 +199,10 @@ public class LatticeRegistries {
         }
 
         public <T extends Item, I extends LatticeItem<T>> I register(@NotNull String id, @NotNull LatticeItem.AppendableBuilder<T, I, ?> builder) {
+            if (isFrozen()) {
+                ErrUtils.isFrozenErr(this.modId);
+            }
+
             I latticeItem = builder.build(createRegistryId(this, id), this.ITEMS.register(id, builder::generate));
             this.registryContent.add(latticeItem);
 
@@ -198,6 +229,10 @@ public class LatticeRegistries {
         }
 
         public <T extends Block, I extends LatticeBlock<T>> I register(@NotNull String id, @NotNull LatticeBlock.AppendableBuilder<T, ? extends I, ?> builder) {
+            if (isFrozen()) {
+                ErrUtils.isFrozenErr(this.modId);
+            }
+
             I latticeBlock = builder.build(createRegistryId(this, id), this.BLOCKS.register(id, builder::generate));
             this.BLOCK_ITEMS.register(id, () -> new BlockItem(latticeBlock.get(), builder.getBlockItemProperties()));
             this.registryContent.add(latticeBlock);
@@ -227,6 +262,10 @@ public class LatticeRegistries {
         }
 
         public <I extends LatticeCreativeTab> I register(@NotNull String id, @NotNull LatticeCreativeTab.AppendableBuilder<I, ?> builder) {
+            if (isFrozen()) {
+                ErrUtils.isFrozenErr(this.modId);
+            }
+
             RegistryId registryId = createRegistryId(this, id);
             I latticeTab = builder.build(registryId, this.TABS.register(id, () -> RegistryUtils.createTab(builder, registryId)));
             this.registryContent.add(latticeTab);
@@ -249,6 +288,10 @@ public class LatticeRegistries {
         }
 
         public <I extends LatticeTier> I register(@NotNull String id, @NotNull LatticeTier.AppendableBuilder<I, ?> builder) {
+            if (isFrozen()) {
+                ErrUtils.isFrozenErr(this.modId);
+            }
+
             I latticeTier = builder.build(createRegistryId(this, id), null);
             this.registryContent.add(latticeTier);
 
@@ -269,6 +312,10 @@ public class LatticeRegistries {
         }
 
         public <I extends LatticeFX> I register(@NotNull String id, @NotNull LatticeFX.AppendableBuilder<I, ?> builder) {
+            if (isFrozen()) {
+                ErrUtils.isFrozenErr(this.modId);
+            }
+
             I latticeFX = builder.build(createRegistryId(this, id), null);
             this.registryContent.add(latticeFX);
 
@@ -297,6 +344,10 @@ public class LatticeRegistries {
 
         @SuppressWarnings("DataFlowIssue")
         public <T extends Block, BE extends BlockEntity, I extends LatticeBlockEntity<T, BE>> I register(@NotNull String id, LatticeBlockEntity.AppendableBuilder<T, BE, I, ?, ?> builder) {
+            if (isFrozen()) {
+                ErrUtils.isFrozenErr(this.modId);
+            }
+
             DeferredBlock<T> deferredBlock = BLOCKS.register(id, builder::generate);
             I latticeBlockEntity = builder.build(createRegistryId(this, id), deferredBlock);
 
@@ -346,6 +397,10 @@ public class LatticeRegistries {
         }
 
         public <I extends LatticeArmorMaterial> I register(@NotNull String id, @NotNull LatticeArmorMaterial.AppendableBuilder<I, ?> builder) {
+            if (isFrozen()) {
+                ErrUtils.isFrozenErr(this.modId);
+            }
+
             RegistryId registryId = createRegistryId(this, id);
             ResourceLocation resourceLocation = registryId.toResourceLoc();
             I latticeArmorType = builder.build(registryId, this.ARMOR_MATERIALS.register(id, () ->
@@ -380,6 +435,10 @@ public class LatticeRegistries {
         }
 
         public <I extends LatticeTrimMaterial> I register(@NotNull String id, @NotNull LatticeTrimMaterial.AppendableBuilder<I, ?> builder) {
+            if (isFrozen()) {
+                ErrUtils.isFrozenErr(this.modId);
+            }
+
             RegistryId registryId = createRegistryId(this, id);
             I latticeTrimMaterial = builder.build(registryId, ResourceKey.create(Registries.TRIM_MATERIAL, registryId.toResourceLoc()));
             this.registryContent.add(latticeTrimMaterial);
@@ -404,6 +463,10 @@ public class LatticeRegistries {
         }
 
         public <I extends LatticeTrimPattern> I register(@NotNull String id, @NotNull LatticeTrimPattern.AppendableBuilder<I, ?> builder) {
+            if (isFrozen()) {
+                ErrUtils.isFrozenErr(this.modId);
+            }
+
             RegistryId registryId = createRegistryId(this, id);
             ResourceKey<TrimPattern> resourceKey = ResourceKey.create(Registries.TRIM_PATTERN, registryId.toResourceLoc());
             builder.setTrimItem(SMITHING_TEMPLATES.register(id + "_armor_trim_smithing_template", () -> SmithingTemplateItem.createArmorTrimTemplate(resourceKey)));
@@ -470,7 +533,19 @@ public class LatticeRegistries {
         return new LinkedList<>(trimPatterns);
     }
 
+    public static <T extends LatticeRegistry<?>> T createRegistry(@NotNull T registry) {
+        if (isFrozen()) {
+            ErrUtils.createFrozenErr(registry.modId);
+        }
+
+        return registry;
+    }
+
     private static <T extends LatticeObject> void transmute(@NotNull Collection<T> collection, @NotNull T transmutable) {
+        if (isFrozen()) {
+            ErrUtils.isFrozenErr(transmutable.getModId());
+        }
+
         checkDuplicate(collection, transmutable.getRegistryId());
         collection.add(transmutable);
     }

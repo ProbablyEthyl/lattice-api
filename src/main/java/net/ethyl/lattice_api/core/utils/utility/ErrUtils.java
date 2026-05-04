@@ -19,4 +19,12 @@ public class ErrUtils {
     public static void illegalAccessErr(@NotNull String fieldName) {
         throw new RuntimeException("Illegal access at the field '" + fieldName + "'!");
     }
+
+    public static void createFrozenErr(@NotNull String modId) {
+        throw new InstantiationError("The mod '" + modId + "' tried to create a registry while registries are frozen!");
+    }
+
+    public static void isFrozenErr(@NotNull String modId) {
+        throw new InstantiationError("The mod '" + modId + "' tried to register (to) a frozen registry!");
+    }
 }

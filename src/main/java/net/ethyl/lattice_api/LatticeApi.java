@@ -10,6 +10,7 @@ import net.ethyl.lattice_api.mod.registries.TransmutedTrimPatterns;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.util.Set;
@@ -21,11 +22,15 @@ public class LatticeApi {
 
     public LatticeApi(IEventBus modEventBus, ModContainer modContainer) {
         LatticeTypes.register(modEventBus);
-        Events.addListener();
+        Events.addListeners(modEventBus);
         TransmutedItems.transmute();
         TransmutedTrimMaterials.transmute();
         TransmutedTrimPatterns.transmute();
         LatticeDataGen.addListeners(modEventBus, modContainer, Set.of());
         LatticeApiClient.addListeners(modEventBus);
+    }
+
+    public static void info(@NotNull String message) {
+        LOGGER.info(message);
     }
 }
